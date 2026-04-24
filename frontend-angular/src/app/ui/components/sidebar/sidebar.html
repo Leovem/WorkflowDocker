@@ -1,0 +1,83 @@
+@if (isOpen()) {
+<div class="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm" (click)="toggleMobile()"></div>
+}
+
+<button (click)="toggleMobile()"
+  class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[#141414] border border-[#262626] rounded-lg text-emerald-500 shadow-lg hover:bg-emerald-500/10 transition-all">
+  <span class="text-[10px] font-bold">{{ isCollapsed() ? '→' : '←' }}</span>
+</button>
+
+
+<nav [class]="'fixed lg:sticky top-0 left-0 z-40 bg-[#141414] h-screen border-r border-[#262626] flex flex-col transform transition-all duration-300 shrink-0 ' + 
+             (isCollapsed() ? 'w-20' : 'w-64') + ' ' + 
+             (isOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')">
+  <nav [class]="'fixed lg:sticky top-0 left-0 z-40 bg-[#141414] h-screen border-r border-[#262626] flex flex-col transform transition-all duration-300 shrink-0 ' + 
+             (isCollapsed() ? 'w-20' : 'w-64') + ' ' + 
+             (isOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')">
+
+    <button (click)="toggleCollapse()"
+      class="hidden lg:flex absolute -right-3 top-10 w-6 h-6 bg-emerald-600 rounded-full items-center justify-center text-white border border-emerald-400 z-50 hover:bg-emerald-500 transition-transform active:scale-90">
+      <span class="text-[10px] font-bold">{{ isCollapsed() ? '→' : '←' }}</span>
+    </button>
+
+    <div
+      [class]="'pt-6 pb-4 px-4 flex flex-col items-center border-b border-[#262626] transition-all duration-300 ' + (isCollapsed() ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100 mb-4')">
+      <div
+        class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/30 mb-2 shadow-lg shadow-emerald-950">
+        <span class="text-emerald-500 text-xl font-black">P</span>
+      </div>
+      <div class="text-center w-full">
+        <h3 class="text-white font-bold text-[10px] uppercase tracking-tighter truncate px-2">{{ email }}</h3>
+        <span
+          class="text-[8px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-md font-black uppercase tracking-widest border border-emerald-500/20 mt-1 inline-block">
+          {{ role }}
+        </span>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto overflow-x-hidden pt-4"
+      style="direction: rtl; scrollbar-width: thin; scrollbar-color: #10b981 #141414;">
+      <div style="direction: ltr" class="px-3">
+
+        @for (group of visibleMenuGroups; track group.title) {
+
+        @if (!isCollapsed()) {
+        <p [class]="group.title === 'Menú' ? 
+              'text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 mt-2 opacity-50 px-4 font-sans' : 
+              'text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-6 mb-2 opacity-70 px-4 font-sans'">
+          {{ group.title }}
+        </p>
+        }
+
+        @for (item of group.items; track item.label) {
+        <a [routerLink]="item.path" routerLinkActive="bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+          class="flex items-center px-3 py-2.5 my-1 text-slate-400 transition-all rounded-lg border border-transparent hover:bg-emerald-500/10 hover:text-emerald-500 group">
+
+          <lucide-icon [name]="item.icon" [size]="18" [class]="isCollapsed() ? '' : 'mr-3'"></lucide-icon>
+
+          @if (!isCollapsed()) {
+          <span class="text-sm font-medium">{{ item.label }}</span>
+          }
+        </a>
+        }
+        }
+      </div>
+    </div>
+
+    <div class="p-3 border-t border-[#262626]">
+      <div class="p-3 border-t border-[#262626]">
+        <button (click)="logout()"
+          class="w-full flex items-center justify-center py-2.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-all text-[10px] font-black uppercase border border-red-500/10 hover:border-red-500/30 group">
+
+          <lucide-icon [name]="LogoutIcon" [size]="16" [class]="isCollapsed() ? '' : 'mr-2'"
+            class="transition-transform group-hover:scale-110">
+          </lucide-icon>
+
+          @if (!isCollapsed()) {
+          <span>Salir del Sistema</span>
+          }
+        </button>
+
+      </div>
+    </div>
+  </nav>

@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+//@import 'driver.js/dist/driver.css';
+
+:root {
+  --bg-dark: #0a0a0a;
+  --bg-card: #141414;
+  --border-color: #262626;
+  --emerald-main: #10b981;
+  --emerald-hover: rgba(16, 185, 129, 0.1);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: var(--bg-dark);
+  color: white;
+}
+
+
+::ng-deep .edge .line {
+  stroke-dasharray: 8;
+  stroke-dashoffset: 100;
+  animation: flowAnimation 5s linear infinite;
+  transition: stroke 0.3s ease;
+}
+
+@keyframes flowAnimation {
+  from {
+    stroke-dashoffset: 100;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+::ng-deep .node-wrapper:hover foreignObject {
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4));
+  transition: filter 0.3s ease;
+}
+
+
+
+/* --- TEMA JARVIS PARA EL TOUR (DRIVER.JS) --- */
+.mi-tema-oscuro {
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(168, 85, 247, 0.5) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.15) !important;
+}
+
+.mi-tema-oscuro .driver-popover-title {
+  color: #10b981 !important; /* Verde Esmeralda */
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-size: 14px !important;
+  margin-bottom: 8px !important;
+}
+
+.mi-tema-oscuro .driver-popover-description {
+  color: #a1a1aa !important; /* Gris claro */
+  font-size: 12px !important;
+}
+
+/* Botones del Tour */
+.mi-tema-oscuro .driver-popover-footer button {
+  background-color: #141414 !important;
+  border: 1px solid #3f3f46 !important;
+  color: white !important;
+  text-shadow: none !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+}
+
+.mi-tema-oscuro .driver-popover-footer button:hover {
+  background-color: #a855f7 !important; /* Púrpura al pasar el mouse */
+  border-color: #a855f7 !important;
+}
+
+.mi-tema-oscuro .driver-popover-progress-text {
+  color: #a855f7 !important;
+  font-weight: bold !important;
+}

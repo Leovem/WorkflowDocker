@@ -1,0 +1,19 @@
+Fase 1: El Lienzo y el Motor de RenderizadoEsta fase establece el contenedor donde ocurrirá la magia.
+Tarea 1: Estructura de Host y Lienzo SVG:Crear el componente Workflow como Standalone.Configurar el CSS del host para ocupar el 100vh y el fondo oscuro cyberpunk.Implementar el patrón de puntos (dotPattern) en el SVG de ngx-graph para dar la sensación de profundidad de n8n.
+Tarea 2: El Layout Manual y el Sistema de Coordenadas:Implementar la clase ManualLayout que hereda de Layout.Esto es vital para que los nodos no "salten" solos; el sistema debe respetar la posición (x, y) exacta que definamos.
+
+Fase 2: Interactividad y Drag & Drop (Fluidez n8n)Aquí resolvemos el problema de que el nodo aparezca exactamente donde sueltas el mouse.
+Tarea 3: Normalización de Coordenadas de Arrastre:Implementar onDrop capturando el getBoundingClientRect() del SVG.Corrección Crítica: Calcular el desfase (event.clientX - rect.left) para que el nodo se cree centrado bajo el cursor y no en la esquina superior izquierda.
+Tarea 4: Implementación del Sidebar UML:Crear el FlowSidebarComponent con soporte para draggable="true".Definir el método onDragStart que envíe el nodeType y las dimensiones predeterminadas (ej: 250x150 para acciones).
+
+Fase 3: Nodos Especializados y "ForeignObject"En esta fase pasamos de "cajas" a componentes visuales ricos.
+Tarea 5: El Contenedor Switch de Nodos:En el nodeTemplate, implementar un ngSwitch basado en node.data.type.Usar <svg:foreignObject> para inyectar componentes HTML/Angular dentro del mundo SVG.
+Tarea 6: Desarrollo del ActionNode (Core de Actividades):Crear el componente con estilos dinámicos (rojo si está bloqueado, azul si lo edito yo, esmeralda si está configurado).Añadir los indicadores visuales (check de configurado y candado de bloqueo).
+
+Fase 4: Sistema de Conexiones (Wiring)Permitir que el usuario "dibuje" la lógica.
+Tarea 7: Dibujado Dinámico de Cables (Ghost Edge):Implementar el isLinking y el SVG temporal que sigue al mouse (line con stroke-dasharray) mientras el usuario arrastra la conexión.
+Tarea 8: Lógica de Puertos y Anclaje (N8N Style Ports):Añadir los círculos de entrada y salida (svg:circle) en los bordes izquierdo y derecho del nodo.Vincular los eventos mousedown para iniciar la conexión (startLink) y mouseup para finalizarla (endLink).
+
+Fase 5: Colaboración y Estado PersistenteHacer que el sistema funcione para equipos y no pierda datos.
+Tarea 9: Gestión de Estado Local y Auto-guardado:Implementar saveToLocalStorage con una clave basada en el ID de la política.Crear un intervalo de auto-guardado cada 10 segundos para prevenir pérdidas por cierre de pestaña.
+Tarea 10: Sincronización WebSocket (Cursores y Bloqueos):Mapear los mensajes de cursor para mover los punteros de otros usuarios en tiempo real.Implementar el sistema de lockedNodes para deshabilitar la edición de un nodo si alguien más ya lo tiene abierto.

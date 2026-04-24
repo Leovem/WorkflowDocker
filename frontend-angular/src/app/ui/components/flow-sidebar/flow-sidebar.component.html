@@ -1,0 +1,112 @@
+<aside
+    [class]="'relative transition-all duration-500 ease-in-out bg-[#080808] flex flex-col h-full ' + (isOpen ? 'w-80 border-l border-neutral-800' : 'w-0 border-l-0')">
+
+    <button (click)="toggleSidebar()"
+        class="absolute -left-6 top-1/2 -translate-y-1/2 z-[70] w-6 h-12 bg-neutral-800 border border-neutral-700 flex items-center justify-center rounded-l-md text-white shadow-xl hover:bg-neutral-700 active:scale-95 transition-all">
+        {{ isOpen ? '›' : '‹' }}
+    </button>
+
+    <div class="w-full h-full overflow-hidden">
+
+        <div [class]="'w-80 h-full overflow-y-auto overflow-x-hidden custom-scrollbar transition-opacity duration-300 ' + (!isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100')"
+            style="scroll-behavior: smooth;">
+
+            <div class="p-6 space-y-6 pb-32">
+                <h2 class="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] mb-6 italic text-center">
+                    Library UML 2.5
+                </h2>
+
+                <details class="group border-b border-neutral-800/50 pb-4" open>
+                    <summary
+                        class="list-none flex justify-between items-center cursor-pointer text-[10px] font-bold text-emerald-500 uppercase transition-all">
+                        <span>🏢 Unidades Responsables</span>
+                        <span class="group-open:rotate-180 transition-transform text-[10px]">▼</span>
+                    </summary>
+                    <div class="space-y-2 mt-4">
+                        @for (d of deptos; track d.id) {
+                        <div draggable="true"
+                            (dragstart)="onDragStart($event, 'lane', d.name, { isLane: true, deptoId: d.id })"
+                            class="p-3 bg-neutral-900 border border-neutral-800 rounded-xl cursor-grab hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-[9px] text-neutral-300 font-bold uppercase">
+                            {{ d.name }}
+                        </div>
+                        }
+                    </div>
+                </details>
+
+                <details class="group border-b border-neutral-800/50 pb-4" open>
+                    <summary
+                        class="list-none flex justify-between items-center cursor-pointer text-[10px] font-bold text-neutral-400 uppercase">
+                        <span>⚖️ Control y Actividades</span>
+                        <span class="group-open:rotate-180 transition-transform text-[10px]">▼</span>
+                    </summary>
+                    <div class="grid grid-cols-1 gap-2 mt-4">
+                        <div draggable="true"
+                            (dragstart)="onDragStart($event, 'decision', 'Condición', { deptoId: (deptos[0]?.id || 'default') })"
+                            class="p-3 bg-neutral-900 border border-neutral-800 rounded-xl cursor-grab flex items-center gap-3 hover:border-emerald-500/40 transition-all">
+                            <div class="w-3 h-3 border-2 border-emerald-500 rotate-45"></div>
+                            <span class="text-[9px] text-neutral-400 font-bold uppercase">If/ Else</span>
+                        </div>
+
+                        <div draggable="true"
+                            (dragstart)="onDragStart($event, 'action', 'Tarea Nueva', { deptoId: (deptos[0]?.id || 'default') })"
+                            class="p-3 bg-neutral-900 border border-emerald-500/30 rounded-xl cursor-grab text-center text-[9px] text-white font-black uppercase hover:bg-emerald-500/10 transition-all active:scale-95">
+                            Actividad
+                        </div>
+
+                        <div draggable="true"
+                            (dragstart)="onDragStart($event, 'merge', 'Merge', { deptoId: (deptos[0]?.id || 'default') })"
+                            class="p-3 bg-neutral-900 border border-neutral-800 rounded-xl cursor-grab flex items-center gap-3 hover:border-neutral-500/40 transition-all">
+                            <div class="w-3 h-3 border border-neutral-400 rotate-45"></div>
+                            <span class="text-[9px] text-neutral-400 font-bold uppercase">Merge (Fusión)</span>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="group border-b border-neutral-800/50 pb-4" open>
+                    <summary
+                        class="list-none flex justify-between items-center cursor-pointer text-[10px] font-bold text-neutral-400 uppercase">
+                        <span>🚩 Estados y Tiempos</span>
+                        <span class="group-open:rotate-180 transition-transform text-[10px]">▼</span>
+                    </summary>
+                    <div class="space-y-3 mt-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div draggable="true"
+                                (dragstart)="onDragStart($event, 'start', 'Inicio', { deptoId: (deptos[0]?.id || 'default') })"
+                                class="p-3 bg-neutral-900 border border-neutral-800 rounded-xl cursor-grab flex flex-col items-center gap-1 hover:border-emerald-500/40 transition-all">
+                                <div class="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_5px_#10b981]"></div>
+                                <span class="text-[7px] text-neutral-400 font-black uppercase">Inicio</span>
+                            </div>
+                            <div draggable="true"
+                                (dragstart)="onDragStart($event, 'end', 'Fin', { deptoId: (deptos[0]?.id || 'default') })"
+                                class="p-3 bg-neutral-900 border border-neutral-800 rounded-xl cursor-grab flex flex-col items-center gap-1 hover:border-red-500/40 transition-all">
+                                <div class="w-3 h-3 bg-red-500 rounded-full border border-white"></div>
+                                <span class="text-[7px] text-neutral-400 font-black uppercase">Fin</span>
+                            </div>
+                        </div>
+                        <div draggable="true"
+                            (dragstart)="onDragStart($event, 'fork', 'Fork (División)', { deptoId: (deptos[0]?.id || 'default') })"
+                            class="p-4 bg-neutral-900 border-2 border-blue-500/20 rounded-xl cursor-grab flex flex-col items-center gap-3 hover:border-blue-500/50 transition-all group">
+                            <div
+                                class="w-20 h-1.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)] group-hover:bg-blue-400 transition-all">
+                            </div>
+                            <span class="text-[8px] text-neutral-400 font-black uppercase tracking-tighter text-center">
+                                Fork / División
+                            </span>
+                        </div>
+
+                        <div draggable="true"
+                            (dragstart)="onDragStart($event, 'join', 'Join (Unión)', { deptoId: (deptos[0]?.id || 'default') })"
+                            class="p-4 bg-neutral-900 border-2 border-amber-500/20 rounded-xl cursor-grab flex flex-col items-center gap-3 hover:border-amber-500/50 transition-all group">
+                            <div
+                                class="w-20 h-1.5 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)] group-hover:bg-amber-400 transition-all">
+                            </div>
+                            <span class="text-[8px] text-neutral-400 font-black uppercase tracking-tighter text-center">
+                                Join / Sincronización
+                            </span>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+</aside>

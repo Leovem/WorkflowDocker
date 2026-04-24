@@ -1,0 +1,84 @@
+<div class="fixed bottom-6 right-6 w-96 h-[550px] max-h-[85vh] bg-[#0d0d0d] border border-purple-500/40 rounded-2xl flex flex-col z-[100] shadow-[0_10px_40px_rgba(168,85,247,0.25)] overflow-hidden">
+  
+  <div class="h-14 flex items-center justify-between px-5 border-b border-purple-500/20 shrink-0 bg-[#0a0a0a]">
+    <h2 class="font-bold text-white uppercase text-[11px] tracking-widest flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse block" style="box-shadow: 0 0 10px #a855f7;"></span>
+      Jarvis Copilot
+    </h2>
+    <button (click)="cerrar()" class="text-neutral-500 hover:text-red-500 transition-colors">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5 text-xs 
+              [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-purple-900/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-purple-500/50">
+    
+    <div *ngFor="let msg of chatMessages" 
+         class="flex flex-col"
+         [class.items-end]="msg.role === 'user'" 
+         [class.items-start]="msg.role === 'assistant'">
+      
+      <span class="text-[9px] uppercase tracking-wider text-neutral-500 mb-1 ml-1" *ngIf="msg.role === 'assistant'">Jarvis</span>
+      <span class="text-[9px] uppercase tracking-wider text-purple-400 mb-1 mr-1" *ngIf="msg.role === 'user'">Tú</span>
+
+      <div class="inline-block p-3.5 rounded-2xl max-w-[85%] text-left relative"
+           [class.bg-purple-600]="msg.role === 'user'" [class.text-white]="msg.role === 'user'" [class.rounded-tr-sm]="msg.role === 'user'"
+           [class.bg-[#141414]]="msg.role === 'assistant'" [class.text-neutral-300]="msg.role === 'assistant'" [class.rounded-tl-sm]="msg.role === 'assistant'"
+           [class.border]="msg.role === 'assistant'" [class.border-neutral-800]="msg.role === 'assistant'">
+        
+        <p class="whitespace-pre-wrap leading-relaxed">{{ msg.content }}</p>
+        
+        <button *ngIf="msg.hasAction && !msg.actionPayload?.tour" (click)="aplicarCambios(msg.actionPayload)"
+                class="mt-3 w-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 py-2 rounded-lg text-[10px] uppercase font-black hover:bg-emerald-500 hover:text-black transition-all">
+          Aplicar al Diagrama
+        </button>
+      </div>
+    </div>
+    
+    <div *ngIf="isAiTyping" class="flex gap-1 items-center p-3">
+      <div class="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce"></div>
+      <div class="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+      <div class="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+    </div>
+  </div>
+
+  <div class="p-4 border-t border-purple-500/20 bg-[#0a0a0a]">
+    <div class="flex gap-2 items-end">
+      
+      <button (click)="toggleRecording()" 
+              [class.bg-red-500/20]="isRecording" [class.text-red-500]="isRecording" [class.border-red-500/50]="isRecording"
+              [class.bg-[#141414]]="!isRecording" [class.text-neutral-400]="!isRecording" [class.border-neutral-800]="!isRecording"
+              class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-neutral-800">
+        
+        <svg *ngIf="!isRecording" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="22"></line>
+        </svg>
+
+        <span *ngIf="isRecording" class="flex gap-0.5 items-center justify-center h-full">
+          <span class="w-1 bg-red-500 h-3 rounded-full animate-pulse"></span>
+          <span class="w-1 bg-red-500 h-5 rounded-full animate-pulse" style="animation-delay: 0.1s"></span>
+          <span class="w-1 bg-red-500 h-3 rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
+        </span>
+      </button>
+
+      <textarea [(ngModel)]="userPrompt" (keyup.enter)="enviarMensaje()"
+                placeholder="Pregúntale a Jarvis..." 
+                rows="1"
+                class="flex-1 bg-[#141414] border border-neutral-800 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-purple-500 resize-none min-h-[40px]"></textarea>
+      
+      <button (click)="enviarMensaje()" [disabled]="!userPrompt.trim() || isAiTyping"
+              class="shrink-0 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+      </button>
+    </div>
+
+    <div class="flex gap-2 mt-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      <button (click)="preguntarRapido('Audita este diagrama buscando nodos sueltos o errores.')" 
+              class="shrink-0 text-[10px] font-bold tracking-wide uppercase bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 px-3 py-1.5 rounded-lg transition-colors">
+        ✨ Auditar Diagrama
+      </button>
+    </div>
+  </div>
+</div>

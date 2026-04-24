@@ -1,0 +1,63 @@
+<div class="h-full flex flex-col items-center justify-center space-y-6">
+  <div class="text-center space-y-4">
+    <div
+      class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4 shadow-lg shadow-emerald-900/20">
+      <span class="text-emerald-500 text-4xl font-black">P</span>
+    </div>
+    <h1 class="text-4xl font-bold text-white tracking-tight">Bienvenido al Panel de Administración</h1>
+    <p class="text-slate-400 max-w-lg mx-auto">Hola <span class="text-emerald-400 font-medium">{{ userName }}</span>.
+      Utiliza el menú lateral para consultar y modificar el catálogo de Usuarios, gestionar Roles del sistema y
+      administrar los Departamentos de tu organización.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 w-full max-w-4xl">
+    <div
+      class="bg-[#141414] p-6 rounded-xl border border-slate-800 shadow-xl hover:border-emerald-500/50 transition-colors group cursor-pointer">
+      <div class="text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-users">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Usuarios</h3>
+      <p class="text-sm text-slate-500">Manejo de acceso y personal</p>
+    </div>
+
+    <div
+      class="bg-[#141414] p-6 rounded-xl border border-slate-800 shadow-xl hover:border-emerald-500/50 transition-colors group cursor-pointer">
+      <div class="text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-shield">
+          <path
+            d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Roles</h3>
+      <p class="text-sm text-slate-500">Credenciales del sistema</p>
+    </div>
+
+    <div
+      class="bg-[#141414] p-6 rounded-xl border border-slate-800 shadow-xl hover:border-emerald-500/50 transition-colors group cursor-pointer">
+      <div class="text-emerald-500 mb-4 group-hover:scale-110 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-building-2">
+          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+          <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+          <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+          <path d="M10 6h4" />
+          <path d="M10 10h4" />
+          <path d="M10 14h4" />
+          <path d="M10 18h4" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Departamentos</h3>
+      <p class="text-sm text-slate-500">Distribución por áreas</p>
+    </div>
+  </div>
+</div>

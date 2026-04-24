@@ -1,0 +1,48 @@
+<div class="p-8 max-w-7xl mx-auto min-h-screen">
+
+    <header class="mb-10 text-center sm:text-left">
+        <h1 class="text-3xl font-bold text-white tracking-tight">Panel de Recepción</h1>
+        <p class="text-slate-400 mt-2 text-lg">Seleccione un trámite para iniciar el flujo de gestión</p>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+        <div *ngFor="let policy of policies" (click)="openPolicyModal(policy)"
+            class="bg-[#141414] border border-slate-800 rounded-xl p-6 shadow-xl hover:border-emerald-500/50 transition-colors group cursor-pointer flex flex-col relative overflow-hidden">
+
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+
+            <div
+                class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-5 group-hover:scale-110 transition-transform relative z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-file-text text-emerald-500">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                    <path d="M10 9H8" />
+                    <path d="M16 13H8" />
+                    <path d="M16 17H8" />
+                </svg>
+            </div>
+
+            <h3 class="text-lg font-bold text-white mb-2 relative z-10">{{ policy.name }}</h3>
+
+            <p class="text-slate-400 text-sm line-clamp-3 mb-6 flex-grow relative z-10">
+                {{ policy.description }}
+            </p>
+
+            <button
+                class="w-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 py-2.5 rounded-lg font-semibold pointer-events-none group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 shadow-md relative z-10">
+                Iniciar Trámite
+            </button>
+        </div>
+
+    </div>
+
+    <app-dynamic-modal [isOpen]="isModalOpen" [config]="currentModalConfig" (close)="closeModal()"
+        (submitForm)="handleFormSubmit($event)">
+    </app-dynamic-modal>
+
+</div>

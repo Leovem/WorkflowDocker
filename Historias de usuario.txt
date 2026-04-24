@@ -1,0 +1,438 @@
+👥 Actores del SistemaActorDescripciónAdministrador / RootResponsable de la gestión de la identidad organizacional (usuarios, roles, deptos) y la configuración global.Diseñador de PolíticasUsuario técnico que utiliza el editor visual y la IA para diagramar los procesos (Swimlanes).FuncionarioPersonal de la universidad que ejecuta las tareas del trámite, llena formularios y usa el dictado por voz.Solicitante (Efímero)Usuario externo que inicia un trámite. Su existencia en el sistema es temporal (perfil efímero).JARVIS (Sistema IA)Actor de sistema que asiste en el diseño, procesa voz (Whisper) y detecta anomalías.📑 Lista de Casos de Uso (CU) por Módulo1. Módulo de Gestión de Identidad (Identity Provider - Spring Boot)CU-01: Iniciar Sesión / Gestión de Acceso: Autenticación mediante JWT para actores internos.CU-02: Gestión de Estructura Organizacional: CRUD de Departamentos (Calles), Roles y Usuarios.CU-03: Recuperar Contraseña: Gestión de seguridad para cuentas institucionales.2. Módulo de Diseño de Políticas (Workflow Designer - FastAPI/Angular)CU-04: Diseño Visual de Políticas (Swimlanes): Editor drag-and-drop para crear diagramas UML 2.5 (Nodos y Edges) guardados en MongoDB.CU-05: Asistente de Diseño con IA (JARVIS): Generación y modificación de nodos mediante lenguaje natural (Local LLM).CU-06: Edición Colaborativa en Tiempo Real: Visualización de cursores y bloqueo de nodos vía WebSockets/Redis.CU-07: Gestión de Versiones de Políticas: Control de versiones en SQL que apuntan a esquemas JSON en Mongo.3. Módulo de Ejecución y Trámites (Workflow Engine - Spring/FastAPI)CU-08: Instanciación de Trámite y Perfil Efímero: Creación de un trámite para un Solicitante con token de acceso temporal.CU-09: Generación Dinámica de Formularios: Renderizado en Angular de los campos config_form definidos en el JSON de la política.CU-10: Procesamiento de Tareas con Voz: Llenado de campos mediante Whisper/IA, mapeando el audio a los esquemas de MongoDB.CU-11: Gestión de Actividades (Bandeja de Entrada): Lista de tareas pendientes para el Funcionario según su departamento (Calle).CU-12: Gestión de Trámites (Seguimiento): Interfaz para que el Solicitante vea el estado actual de su trámite (Diagrama de Estados).4. Módulo de Inteligencia de Negocio y NotificacionesCU-13: Analítica de Anomalías y Cuellos de Botella: Detección automática de "rebotes" y retrasos en los nodos mediante análisis del historial en Mongo.CU-14: Notificaciones en Tiempo Real: Alertas al Solicitante y Funcionario sobre avances o requerimientos vía WebSockets.CU-15: Purga de Datos y Cierre de Ciclo: Eliminación automática de registros del Solicitante al finalizar el trámite (Nodo "Fin") para garantizar privacidad.
+
+
+
+
+bien, ahora como estamos creando una automatizacion de procesos mediante el diagrema de activiades organizados en calle. te digo eso para que estres en contexto sobre el proyecto.
+cada departamento representa una calle, y esa calle debe tener dontro los nodso que se le asigne, para eso modifica el tamaño del nodo de departamentos para que se le asigenen nodos.
+despues cada nodo tiene su panel de configuracion, y en ese panel se debe poder configurar segun el tipo de nodo y segun al gusto del administrador, bastante flexible debe ser en la configuracion. 
+conocemos las estructuras de contro (if, while, join. fork, merge) y son las que tenemos, cada uno de esas estructuras de contro tienen su propia configuracion estandar de logica, el administrador debe poder configurarlo. despues esta el nodo de actifivad, ese nodo debe ser configurable segun al gusto del administrador, tegno algunas ideas, puedes agregar unos interuptores booleanos (documentos, fotos, o cualquier otro requisito que se pueda ocupar en tramites o procesos. y tambien importante agrega un generador de formularios, donde el administrador podra elegir el que agregar al formulario la etiqueta y el tipo de dato. 
+tambien agrega las conexiones entre los nodos, como es un diagrama de actividades, se debe notas la secuencia. 
+y cada dato o detalle que se realize en el campo de trabajo debe ser enviado al back, para ser guardado, y en el back rearemos un motor que el flujo viva solo sin la interventicon de una persona. solo lso funcionarios realizaran los nodos de actividad, pero el motor debe decidir a que nodo pasar y usar la logica que fue configurado en las estructuras de control.
+como ultimo rediseña el estilo de los nodos. cada nodo que se vea profesional y moderno, y que que cumpla la forma que esta en uml 2.5
+procede con esas tareas
+
+
+
+
+
+
+Jarvis, constrúyeme el diagrama completo para el 'Proceso de Titulación'. Debes usar todos los tipos de nodos disponibles.
+
+Comienza con un nodo de Inicio, que se conecte a un nodo Fork para una revisión paralela. Del Fork, saca dos tareas: 'Revisión Tribunal 1' y 'Revisión Tribunal 2'. Ambas tareas deben conectarse a un nodo Join para esperar los resultados.
+
+La salida del Join debe ir a un nodo If que evalúe la variable 'estado_tesis == aprobado'. > Si el camino es Falso, conéctalo a una tarea llamada 'Corregir Tesis' que requiera subir un documento, y de ahí conéctalo a un nodo Merge. > Si el camino es Verdadero, conéctalo directo a ese mismo nodo Merge.
+
+Finalmente, la salida del Merge debe ir a una última tarea llamada 'Emitir Título', y de ahí a un nodo de Fin.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+🏗️ Fase de Elaboración y Construcción: Ciclo I
+Enfoque: Infraestructura, Identidad y el Motor de Diseño (Editor de Workflows).
+Meta: Tener la "fábrica" de trámites funcionando y persistida en MongoDB.1. 
+Requisitos (Captura y Análisis)
+CU-01: Gestión de Identidad Organizacional (Spring Boot): CRUD de Usuarios, Departamentos y Roles. Autenticación centralizada con JWT.
+CU-02: Diseño Visual de Políticas (FastAPI/Angular): El editor de Swimlanes. Arrastrar nodos (UML 2.5), conectar lógica y guardar el JSON en Mongo.
+CU-03: Asistente de Diseño con IA (Local LLM): JARVIS ayudando a generar nodos mediante lenguaje natural.
+
+2. Diseño (UML 2.5)
+Diagrama de Clases de Dominio: Mostrar la colección Politicas con sus nodos y edges embebidos.
+Diagrama de Paquetes: Separación entre el Identity Provider (Spring) y el Workflow Engine (FastAPI).
+
+3. Implementación (Estándares de Codificación)
+Angular: Aplicar Smart & Dumb Components. El Canvas es un componente "Smart", mientras que los nodos individuales son "Dumb" (reutilizables).
+Spring Boot: Implementar Arquitectura Hexagonal o por Capas (Controller -> Service -> Repository).
+FastAPI: Uso estricto de Pydantic V2 para validación de esquemas y Dependency Injection.
+
+🚀 Fase de Construcción y Transición: Ciclo II
+Enfoque: Ejecución de Trámites, Voz y Movilidad (Flutter).
+Meta: El trámite "cobra vida", se llena por voz y se monitorea desde el móvil.
+
+1. Requisitos (Captura y Análisis)
+CU-04: Instanciación y Perfil Efímero: Creación de trámites con Token de acceso. Generación de formularios dinámicos basados en el JSON de la política.
+CU-05: Procesamiento de Tareas por Voz (Whisper/IA): El funcionario dicta y la IA mapea la voz a los campos del formulario en MongoDB.
+CU-06: Seguimiento Móvil y Notificaciones (Flutter): App para que el solicitante vea su progreso y reciba alertas por WebSockets.
+CU-07: Analítica de Anomalías: Dashboard de cuellos de botella y detección de "rebotes" entre oficinas.
+
+2. Diseño (UML 2.5)
+Diagrama de Secuencia: El flujo de un audio desde Flutter -> FastAPI -> Whisper -> MongoDB.
+Diagrama de Estado: Los estados del Trámite (Borrador, En_Progreso, Observado, Finalizado).
+3. Implementación (Estándares de Codificación)
+Clean Code: Nombres de variables significativos (evitar t, u, usar tramiteActivo, usuarioAsignado).
+Documentación Inline: Uso de JSDoc en Angular y Docstrings (PEP 257) en Python.
+Resiliencia: Implementar Global Exception Handlers en ambos Backends.
+
+🛠️ Estándares de Codificación Requeridos (Para tu Documento)
+Para que el ingeniero vea que hay rigor técnico, debes incluir una sección de "Guía de Estilos y Estándares":
+Tecnología               Estándar / Guía
+Java (Spring)            Google Java Style Guide / CamelCase para métodos.
+Python (FastAPI)         PEP 8 / Type Hinting obligatorio (typing).
+TypeScript (Angular)     Angular Style Guide (Airbnb/Google) / PascalCase para Clases.
+MongoDB                  Lower Camel Case para nombres de campos en JSON.
+API Design               Estándar RESTful con documentación OpenAPI (Swagger).
+
+
+📝 Ejemplo de Sincronización PUD
+En tu documento, cada HU migrada debe verse así:
+Iteración 1 - Requisito CU-02 (Editor de Workflows):
+Diseño: Ver Diagrama de Clases (Figura 4.2).
+Componente: WorkflowEditorComponent (Angular).
+Persistencia: Colección politicas_canvas en MongoDB.
+Lógica: Servicio WorkflowService en FastAPI usando el patrón Singleton.
+
+
+
+
+sprint boot
+modules/
+├── identity/                  <-- [Spring] Gestión de Usuarios, Roles, Deptos (CU-01)
+│   ├── model/                 <-- Usuario, Rol, Departamento
+│   ├── dto/                   <-- Request/Response (Seguridad)
+│   ├── repository/            
+│   └── service/               
+├── design/                    <-- [Spring/FastAPI] El Editor de Workflows (CU-02, CU-03)
+│   ├── model/                 <-- Politica, Nodo (Embed), Edge (Embed)
+│   ├── repository/            
+│   └── service/               
+├── execution/                 <-- [Spring] Ciclo de Vida del Trámite (CU-04, CU-07, CU-08)
+│   ├── model/                 <-- Tramite, Solicitante (Efímero), Historial
+│   ├── repository/            
+│   └── service/               
+└── ai_gateway/                <-- [FastAPI/Spring] Proxy para IA y Voz (CU-05)
+    ├── dto/                   <-- Esquemas para envío de Audio/Voz
+    └── service/               <-- Cliente Feign/WebClient hacia FastAPI
+
+
+
+angular
+src/app/
+├── core/                       <-- Lógica Global (Singletons)
+│   ├── auth/                   <-- Interceptores JWT y Guards de Ruta
+│   └── services/               <-- API Clients (Spring, FastAPI)
+├── ui/                         <-- BIBLIOTECA DE COMPONENTES (Dumb)
+│   ├── atoms/                  <-- Botones, Inputs, Badges, Iconos
+│   ├── molecules/              <-- SearchBar, FormField, NavItem
+│   ├── organisms/              <-- DataTable, WorkflowNode, Sidebar, Navbar
+│   └── templates/              <-- Layouts (MainLayout, AuthLayout, CanvasLayout)
+├── features/                   <-- LÓGICA DE NEGOCIO (Smart Components)
+│   ├── identity/               <-- Gestión de Usuarios y Roles
+│   ├── workflow-designer/      <-- El Canvas de React Flow y JARVIS
+│   └── tramite-tracking/       <-- Monitor de estados
+└── shared/                     <-- Pipes, Directivas y Utils
+
+
+
+fastapi
+fastapi-ai-engine/
+├── app/
+│   ├── core/                   <-- Configuración global (Seguridad, Env, LLM Settings)
+│   ├── modules/
+│   │   ├── collaboration/      <-- [CU-04] WebSockets y Presencia
+│   │   │   ├── ws_manager.py   <-- Lógica de salas y broadcast de cursores
+│   │   │   └── router.py       <-- Endpoints de WS
+│   │   └── ai_assistant/       <-- [CU-03, CU-05] JARVIS (Whisper & LLM)
+│   │       ├── service.py      <-- Lógica de prompt engineering y RAG
+│   │       ├── whisper_proc.py <-- Procesamiento de audio a texto
+│   │       └── router.py       <-- Endpoints para el asistente
+│   ├── schemas/                <-- Pydantic V2 (Validación de datos JSON)
+│   └── main.py                 <-- Punto de entrada y montaje de rutas
+├── requirements.txt
+└── .env                        <-- Keys de IA y URLs de Mongo/Redis
+
+
+
+🎨 1. Base de Componentes (Atoms & Molecules)Para no reinventar la rueda con el diseño de botones, modales y tablas, usaremos una base sólida que sea fácil de personalizar:Tailwind CSS: Fundamental para el diseño de Átomos. Te permite crear estilos sin salir de tu HTML y es extremadamente ligero.Angular Material: Excelente para componentes complejos de Identidad (Tablas con ordenamiento, Selectores, Modales). Es muy estable y sigue las guías de Google.PrimeNG: Si quieres una alternativa a Material con componentes más "empresariales" (como TreeTables o Dashboards avanzados), es la mejor opción.🕸️ 2. El Motor del Workflow (CU-02)Esta es la pieza crítica. Necesitamos algo que soporte Nodos Personalizados y sea fácil de conectar con FastAPI (WebSockets) y Spring (JSON):Svelto / XYFlow (antes React Flow): Aunque su nombre sugiere React, tienen una versión oficial para Angular llamada [XYFlow for Angular]. Es la librería estándar de la industria para editores visuales.¿Por qué?: Permite crear Swimlanes (calles de departamentos), arrastrar y soltar, y lo más importante: puedes definir tus propios componentes Angular como "Nodos".JointJS / Rappid: Es la opción "heavy duty" si necesitas cumplimiento estricto de UML 2.5. Es muy potente pero tiene una curva de aprendizaje más alta que XYFlow.🤖 3. Asistente y Voz (CU-03, CU-05)Para la interacción con JARVIS y el procesamiento de audio:Socket.io-client: Para la comunicación bidireccional con FastAPI. Es mucho más robusto que usar WebSockets puros, ya que maneja reconexiones automáticas (vital para la colaboración).Web Audio API (Nativo): No necesitas librería extra para capturar el audio; Angular lo maneja bien. Pero para visualizar la onda de voz mientras el funcionario habla, te recomiendo Wavesurfer.js.🏗️ 4. Gestión de Estado y UtilidadesComo JARVIS y otros usuarios modificarán el flujo al mismo tiempo, el estado debe ser impecable:RxJS (Nativo de Angular): Es tu mejor amigo. Usaremos BehaviorSubject para manejar el estado del Workflow de forma reactiva.Lucide Angular: Para los iconos. Son minimalistas, vectoriales y pesan casi nada. Ideales para los Átomos.📝 Resumen del Stack SugeridoCategoríaLibrería RecomendadaPropósitoEstilosTailwind CSSDiseño rápido de Átomos y Layouts.Componentes UIPrimeNGOrganismos complejos (Tablas, Formularios).WorkflowXYFlow (Angular)Editor de Swimlanes y Nodos UML.Tiempo RealSocket.ioConexión con FastAPI (Colaboración e IA).IconosLucide AngularConsistencia visual en todo el sistema.🚀 Mi consejo de IngenieroPuma, para empezar con el CU-01 (Identidad), instala Tailwind y PrimeNG. Son la base perfecta para tus componentes Atómicos.Para el Workflow, XYFlow es la opción ganadora porque te permitirá mapear el JSON de MongoDB directamente a componentes Angular de forma muy natural.¿Instalamos primero Tailwind y PrimeNG para armar el Dashboard de Administración? ¡Dime y te paso los comandos de configuración! 🏗️🚀
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+🚀 Sprint 1: El Cimiento y la Estructura (Semana 1)
+Objetivo: Tener el entorno listo y la gestión de la organización funcionando con seguridad.
+
+HU 01: Configuración del Ecosistema Híbrido
+Como desarrollador, quiero levantar la infraestructura base para asegurar la persistencia y comunicación del sistema.
+
+DB: Levantar Docker con PostgreSQL (Tablas Departamentos, Usuarios), MongoDB y Redis.
+
+Back: Configurar FastAPI con conexión asíncrona a las 3 DBs.
+
+Front: Iniciar proyecto con Vite + TS + Tailwind + React Flow.
+
+HU 02: Gestión de la Estructura
+Como administrador, quiero registrar departamentos y funcionarios para definir quiénes operarán los trámites.
+
+DB: CRUD completo en PostgreSQL para Departamentos y Usuarios (con roles).
+
+Back: Endpoints protegidos con JWT para gestionar el personal.
+
+Front: Vistas de administración de usuarios y organigrama.
+
+🎨 Sprint 2: El Editor Colaborativo Inteligente (Semana 2)
+Objetivo: Permitir el diseño de flujos en calles con ayuda de la IA y WebSockets.
+
+HU 03: Editor de Workflows en Calles (Swimlanes)
+Como administrador, quiero diseñar diagramas de actividades en calles para asignar tareas a departamentos específicos.
+
+DB: Almacenar el workflow_json en MongoDB vinculado a la política en PostgreSQL.
+
+Back: Endpoint para guardar/cargar JSON y lógica de versiones de políticas.
+
+Front: Implementar React Flow con lógica de "calles" y nodos UML 2.5 (IF, AND, FOR).
+
+HU 04: Colaboración y Asistente de Diseño (IA + WS)
+Como diseñador, quiero editar flujos con mis colegas y recibir ayuda de la IA para optimizar las políticas de la universidad.
+
+Back/Redis: Implementar WebSockets (FastAPI + Redis) para ver cursores en vivo y bloquear nodos.
+
+IA: Integrar LM Studio para que, mediante lenguaje natural, se generen o modifiquen nodos en el JSON.
+
+Front: Visualización de presencia (cursores) y chat con el asistente JARVIS.
+
+⚙️ Sprint 3: Ejecución de Trámites y Voz (Semana 3)
+Objetivo: Poner en marcha los trámites, formularios dinámicos y el llenado por voz.
+
+HU 05: Generador de Formularios y Perfil de Solicitante
+Como administrador, quiero definir qué campos requiere cada nodo para que el solicitante inicie su trámite con un perfil efímero.
+
+DB: Definir form_templates en MongoDB y crear la tabla Solicitantes en PostgreSQL.
+
+Back: Generar token de acceso temporal y lógica de inicio de instancia en Mongo.
+
+Front: Portal para el solicitante con visualización del estado del trámite en tiempo real.
+
+HU 06: Procesamiento de Tareas y Llenado por Voz
+Como funcionario, quiero completar mis tareas usando voz para agilizar la atención en ventanilla.
+
+Back: Endpoint de WebSocket para recibir audio y procesarlo con Whisper/IA local.
+
+IA: Mapeo automático de la transcripción de voz a los campos del formulario dinámico.
+
+Front: Monitor de tareas (Verde, Amarillo, Rojo) con botón de dictado por voz.
+
+📈 Sprint 4: Análisis, Anomalías y Cierre (Semana 4)
+Objetivo: Implementar el dashboard, detectar fallos y purgar datos efímeros.
+
+HU 07: Dashboard de Cuellos de Botella y Anomalías
+Como administrador, quiero ver las demoras y rutas inusuales para mejorar los procesos de la institución.
+
+Back: Lógica analítica comparando fecha_entrada y fecha_salida de los nodos en MongoDB.
+
+IA: Algoritmo de detección de "rebotes" (anomalías) entre nodos y predicción de retrasos.
+
+Front: Dashboard con gráficos de rendimiento y alertas de cuellos de botella.
+
+HU 08: Notificaciones y Ciclo de Vida del Solicitante
+Como sistema, debo notificar al cliente y eliminar sus datos al finalizar para garantizar su privacidad.
+
+DB: Ejecutar eliminación de registros en Solicitantes y Acceso_Temporal (PostgreSQL) al llegar al nodo "Fin".
+
+Back/WS: Envío de notificaciones finales vía WebSockets y cierre de conexión del solicitante.
+
+🛠️ Flujo de Trabajo Sugerido para tu Equipo
+Al avanzar en paralelo, cada vez que tomes una HU, debes realizar este ciclo:
+
+Modelo Pydantic: Define el objeto que viajará del Front al Back.
+
+Migración SQL/NoSQL: Crea o ajusta las tablas y colecciones necesarias.
+
+Endpoint FastAPI: Crea la lógica de negocio y conexión con Redis/IA.
+
+Componente React: Crea la interfaz en TypeScript y conéctala al WebSocket o API.
+
+
+
+
+
+### BASE DE DATOS:
+🏛️ 1. Base de Datos Relacional (PostgreSQL)
+Esta base de datos gestiona la consistencia del sistema. En Visual Paradigm, utiliza un diagrama de Entidad-Relación (ERD).
+
+A. Módulo de Organización
+Departamentos
+
+id_depto (Serial, PK)
+
+nombre (Varchar 100): Ej. "Secretaría", "Caja", "Sistemas".
+
+id_padre (Int, FK -> Departamentos): Para jerarquías (opcional).
+
+Usuarios
+
+id_usuario (Serial, PK)
+
+id_depto (Int, FK -> Departamentos)
+
+nombre (Varchar 150)
+
+email (Varchar 100, Unique)
+
+password_hash (Text)
+
+rol (Varchar 20): "Admin", "Funcionario".
+
+B. Módulo de Definición de Políticas
+Politicas
+
+id_politica (Serial, PK)
+
+nombre (Varchar 200)
+
+descripcion (Text)
+
+estado (Varchar 20): "Activo", "Borrador".
+
+Versiones_Workflow
+
+id_version (Serial, PK)
+
+id_politica (Int, FK -> Politicas)
+
+id_mongo_ref (Varchar 50): ID del documento en MongoDB.
+
+numero_version (Int)
+
+fecha_creacion (Timestamp)
+
+C. Módulo de Colaboración y Sesiones
+Sesiones_Edicion
+
+id_sesion (Serial, PK)
+
+id_politica (Int, FK -> Politicas)
+
+id_usuario (Int, FK -> Usuarios)
+
+fecha_inicio (Timestamp)
+
+D. Módulo de Solicitantes (Efímeros)
+Solicitantes
+
+id_solicitante (Serial, PK)
+
+nombre (Varchar 150)
+
+identificacion (Varchar 20)
+
+token_acceso (Varchar 255)
+
+Acceso_Temporal
+
+id_acceso (Serial, PK)
+
+id_solicitante (Int, FK -> Solicitantes)
+
+id_tramite_sql (Int): ID del trámite activo.
+
+expira_at (Timestamp)
+
+🍃 2. Base de Datos NoSQL (MongoDB)
+En Visual Paradigm, puedes usar un Diagrama de Clases o un Object Model para representar estos documentos JSON.
+
+Colección: Workflow_Definitions
+_id (ObjectId, PK)
+
+id_politica_sql (Int): Relación con la tabla Politicas.
+
+workflow_json (Object): Contiene la estructura UML 2.5 (nodos de decisión, unión, bifurcación e iteración).
+
+nodes (Array): id, type (task, decision, fork, join), lane_id (ID del depto), config_form (Campos dinámicos).
+
+edges (Array): id, source, target, condition (Lógica IF/AND/FOR).
+
+Colección: Instancias_Tramites
+_id (ObjectId, PK)
+
+id_solicitante (Int): Relación con Solicitantes en SQL.
+
+nodo_actual_id (String): ID del nodo donde se encuentra el trámite.
+
+status (String): "En curso", "Completado", "Observado".
+
+historial_ejecucion (Array):
+
+id_nodo (String)
+
+id_funcionario (Int)
+
+datos_formulario (Object): Los valores llenados (texto, rutas de archivos).
+
+transcripcion_voz (String): Texto procesado por la IA/Whisper.
+
+timestamp_entrada / timestamp_salida (Date): Para detectar cuellos de botella.
+
+⚡ 3. Almacenamiento Volátil (Redis)
+Presence_Map: politica_id -> { usuario_id: {x, y, cursor_color} } (WebSockets).
+
+Locks: nodo_id -> usuario_id (Para evitar conflictos en edición colaborativa).
+
+📝 Resumen de Relaciones Críticas para el Modelado
+Eliminación en Cascada: Al finalizar un trámite (nodo "Fin"), el backend debe eliminar el registro en Solicitantes y Acceso_Temporal en PostgreSQL.
+
+Referencia Cruzada: Versiones_Workflow en SQL apunta al _id de Workflow_Definitions en MongoDB para que el sistema sepa qué versión del JSON debe cargar.
+
+Detección de Anomalías: El campo historial_ejecucion en MongoDB es la fuente para que la IA y el Dashboard calculen los retrasos y rebotes entre departamentos.
