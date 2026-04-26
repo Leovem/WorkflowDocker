@@ -95,7 +95,7 @@ public class InstanceService {
     }
 
 
-    public Instance completarTareaHumana(String instanceId, String nodeId, Map<String, Object> respuestasFormulario) {
+    public Instance completarTareaHumana(String instanceId, String nodeId, Map<String, Object> respuestasFormulario, String userName) {
         // 1. Buscar la instancia que estaba pausada
         Instance instance = instanceRepo.findById(instanceId)
                 .orElseThrow(() -> new RuntimeException("Instancia no encontrada"));
@@ -129,7 +129,7 @@ public class InstanceService {
         Map<String, Object> policyJson = policyService.findById(instance.getPolicyId());
 
         // 3. Despertar el motor
-        Instance instanciaActualizada = processPolicy.continuarMotor(instance, policyJson, respuestasFormulario);
+        Instance instanciaActualizada = processPolicy.continuarMotor(instance, policyJson, respuestasFormulario, userName);
 
         // 4. Retornar al frontend
         return instanciaActualizada;
@@ -207,7 +207,6 @@ public class InstanceService {
                     if (matchedNode != null) {
                         // Verificamos de qué departamento es EXCLUSIVAMENTE este nodo (Esta "rama")
                         String swimlaneId = (String) matchedNode.get("swimlaneId");
-                        Map<String, Object> lane = null; // Necesitas tu método findLaneById aquí, o hacer un loop
                         
                         // Buscamos el departamento del nodo
                         List<Map<String, Object>> swimlanes = (List<Map<String, Object>>) policyJson.get("swimlanes");

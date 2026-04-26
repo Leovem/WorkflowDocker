@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.Document;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.storage.model.Policy;
 
+import backend_sprint.backend_sprint.modules.Motor.repository.InstanceRepository;
 import backend_sprint.backend_sprint.modules.Proccess.model.policy;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +22,8 @@ public class PolicyServiceImpl implements PolicyService {
     private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
     private static final String COLLECTION = "policy";
     private final backend_sprint.backend_sprint.modules.Proccess.repository.PolicyRepository policyRepository;
+    private final InstanceRepository instanceRepo;
+
 
     @Override
     public java.util.List<java.util.Map<String, Object>> findAll() {
@@ -84,6 +88,9 @@ public class PolicyServiceImpl implements PolicyService {
             }
         }
 
+        // Por seguridad, forzamos a que toda política nueva nazca como borrador
+        request.put("status", false);
+
         if (request.containsKey("id"))
             request.remove("id");
 
@@ -96,6 +103,32 @@ public class PolicyServiceImpl implements PolicyService {
     public java.util.Map<String, Object> update(String id, java.util.Map<String, Object> request) {
         java.util.Map<String, Object> existing = findById(id);
 
+        // =====================================================================
+        // 🛡️ VALIDACIONES DE ARQUITECTURA (BLOQUEO DE EDICIÓN Y DESPUBLICACIÓN)
+        // =====================================================================
+        Boolean statusInDb = (Boolean) existing.get("status");
+
+        // Si la política en la base de datos está PUBLICADA (true)
+        if (Boolean.TRUE.equals(statusInDb)) {
+            
+            Boolean newStatus = (Boolean) request.get("status");
+
+            // ESCENARIO A: El usuario hizo clic en "Despublicar" (status viene como false)
+            if (Boolean.FALSE.equals(newStatus)) {
+                // Verificamos si ya hay ciudadanos/funcionarios usando este trámite
+                if (instanceRepo.existsByPolicyId(id)) {
+                    throw new IllegalStateException("No se puede despublicar esta política porque ya está siendo utilizada en trámites activos.");
+                }
+                // Si no hay trámites, el código continúa y permite guardar el cambio a false.
+            } 
+            // ESCENARIO B: El usuario intenta editar algo más mientras sigue publicada
+            else {
+                throw new IllegalStateException("La política está publicada y no permite modificaciones. Despublíquela primero para poder editarla.");
+            }
+        }
+        // =====================================================================
+
+        // Validar nombre duplicado (tu código original)
         if (request.containsKey("name") && existing.containsKey("name")
                 && !request.get("name").equals(existing.get("name"))) {
             org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query(
@@ -121,8 +154,20 @@ public class PolicyServiceImpl implements PolicyService {
 
     @Override
     public void delete(String id) {
-        java.util.Map<String, Object> existing = findById(id);
-        org.bson.Document doc = new org.bson.Document(existing);
+        Map<String, Object> existing = findById(id);
+        
+        // 🛡️ VALIDACIÓN 1: No eliminar si está publicada
+        Boolean isPublished = (Boolean) existing.get("status");
+        if (isPublished != null && isPublished) {
+            throw new IllegalArgumentException("No se puede eliminar una política que está publicada. Primero cámbiela a modo borrador.");
+        }
+
+        // 🛡️ VALIDACIÓN 2: No eliminar si tiene instancias (aunque esté en borrador, por seguridad)
+        if (instanceRepo.existsByPolicyId(id)) {
+            throw new IllegalArgumentException("No se puede eliminar la política porque ya existen trámites registrados con ella.");
+        }
+
+        Document doc = new Document(existing);
         mongoTemplate.remove(doc, COLLECTION);
     }
 
@@ -175,4 +220,31 @@ public class PolicyServiceImpl implements PolicyService {
         return result;
     }
 */
+
+    @Override
+    public List<Map<String, Object>> findActivePolicies() {
+        // Creamos la regla: El campo "status" debe ser estrictamente 'true'
+        org.springframework.data.mongodb.core.query.Query query = 
+            new org.springframework.data.mongodb.core.query.Query(
+                org.springframework.data.mongodb.core.query.Criteria.where("status").is(true)
+            );
+        
+        // Ejecutamos la búsqueda en la colección de políticas
+        // Usamos Document.class temporalmente y lo mapeamos porque MongoDB devuelve BSON
+        List<org.bson.Document> documents = mongoTemplate.find(query, org.bson.Document.class, COLLECTION);
+        
+        // Convertimos la lista de Documentos a Map<String, Object> para mantener tu estándar
+        return documents.stream()
+                .map(doc -> {
+                    Map<String, Object> map = new java.util.HashMap<>(doc);
+                    // Aseguramos que el ID se parsee correctamente a String
+                    if (map.containsKey("_id")) {
+                        map.put("id", map.get("_id").toString());
+                        map.remove("_id");
+                    }
+                    return map;
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
+
 }

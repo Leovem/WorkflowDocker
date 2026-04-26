@@ -237,10 +237,10 @@ startVisualTour(tourType: string) {
           },
           // 5. HEADER: Botón Guardar
           { 
-            element: '#tour-save', 
+            element: '#tour-publish', 
             popover: { 
               title: 'Guardado Seguro', 
-              description: 'El sistema guarda tu progreso automáticamente cada 5 segundos, pero puedes forzar un guardado manual desde aquí.', 
+              description: 'El sistema guarda tu progreso automáticamente cada 5 segundos, aqui puedes publicar tu politica para que entre en marcha.', 
               side: "bottom", align: 'end' 
             }
           },
@@ -380,7 +380,7 @@ startVisualTour(tourType: string) {
     const draft: Policy = {
       name: 'Nueva Política Sin Título',
       description: 'Política creada de forma interactiva.',
-      status: true,
+      status: false,
       version: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -402,10 +402,45 @@ startVisualTour(tourType: string) {
     });
   }
 
-  // workflow.ts
+
+  togglePublish() {
+    if (!this.selectedPolicy) return;
+
+    const nuevoEstado = !this.selectedPolicy.status;
+    
+    // Si el usuario intenta despublicar, advertimos
+    if (!nuevoEstado) {
+      if (!confirm('¿Estás seguro de despublicar? Esto impedirá que se inicien nuevos trámites con esta política.')) {
+        return;
+      }
+    }
+
+    // Cambiamos el estado localmente para la petición
+    this.selectedPolicy.status = nuevoEstado;
+
+    // Enviamos al backend. Si hay instancias activas, el backend responderá con error
+    this.apiService.sincronizarPolitica(this.selectedPolicy).subscribe({
+      next: () => {
+        const msg = this.selectedPolicy?.status ? '🚀 Política Publicada' : '📁 Política en modo Borrador';
+        console.log(msg);
+      },
+      error: (err) => {
+        // Revertimos el cambio visual si el backend rechazó la operación
+        this.selectedPolicy!.status = !nuevoEstado;
+        alert(err.error || 'No se pudo cambiar el estado. Es posible que la política ya esté en uso.');
+      }
+    });
+  }
+
 
   savePolicy(silent: boolean = false) {
     if (!this.selectedPolicy) return;
+
+    // Si la política está publicada (status === true), bloqueamos el envío de datos al servidor
+    if (this.selectedPolicy.status) {
+      if (!silent) console.log('🔏 Política bloqueada (Publicada). No se permiten cambios.');
+      return; // 🛑 Cortamos la ejecución aquí
+    }
 
     const elements = this.graph.getElements();
     const links = this.graph.getLinks();

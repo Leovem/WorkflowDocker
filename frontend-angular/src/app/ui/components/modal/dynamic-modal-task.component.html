@@ -147,6 +147,23 @@
                                 <h3 class="text-lg font-bold text-white">Formulario de Actividad</h3>
                             </div>
 
+                            <div class="flex items-center justify-between mb-4">
+
+                                <button type="button" (click)="toggleVoice()"
+                                        [class.bg-red-500]="voiceService.isListening"
+                                        [class.animate-pulse]="voiceService.isListening"
+                                        class="bg-purple-600 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-purple-500 transition-colors shadow-[0_0_15px_rgba(147,51,234,0.3)] text-white">
+                                    <span *ngIf="!voiceService.isListening">🎤 Dictado Inteligente</span>
+                                    <span *ngIf="voiceService.isListening">🛑 Escuchando...</span>
+                                </button>
+                            </div>
+
+                            <div *ngIf="voiceService.isProcessing$ | async" 
+                                class="text-purple-400 text-xs mb-4 flex items-center gap-2 animate-pulse bg-purple-500/10 p-2 rounded border border-purple-500/20">
+                                <svg class="animate-spin h-4 w-4" ...></svg>
+                                Jarvis está procesando la información...
+                            </div>
+
                             <div class="mb-4 flex flex-col" *ngFor="let field of config.customFields">
                                 <label class="mb-1.5 font-medium text-sm text-slate-400">
                                     {{ field.label }} <span *ngIf="field.required" class="text-emerald-500">*</span>

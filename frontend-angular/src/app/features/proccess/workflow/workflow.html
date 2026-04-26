@@ -87,9 +87,21 @@
         AI COPILOT
       </button>
       
-      <button id="tour-save" (click)="savePolicy()"
-        class="bg-[#10b981] hover:bg-[#059669] text-black px-6 py-2 rounded-lg text-xs font-black uppercase tracking-wider shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all active:scale-95">
-        Guardar
+      <button id="tour-publish" (click)="togglePublish()"
+        [ngClass]="selectedPolicy?.status ? 
+          'bg-emerald-500 hover:bg-emerald-600 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 
+          'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 shadow-md'"
+        class="px-6 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all active:scale-95 flex items-center gap-2">
+        
+        <svg *ngIf="selectedPolicy?.status" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        
+        <svg *ngIf="!selectedPolicy?.status" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+
+        {{ selectedPolicy?.status ? 'Publicado' : 'Publicar Trámite' }}
       </button>
     </div>
   </header>
@@ -129,6 +141,12 @@
         </div>
       </div>
 
+      <div *ngIf="selectedPolicy?.status" 
+         class="absolute top-4 left-1/2 -translate-x-1/2 z-[110] bg-amber-500/20 border border-amber-500/50 text-amber-500 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-sm">
+      ⚠️ Modo Solo Lectura (Despúblique para editar)
+      </div>
+
+      <div #paperContainer id="paper-container" class="w-full h-full outline-none"></div>
 
 
     </main>

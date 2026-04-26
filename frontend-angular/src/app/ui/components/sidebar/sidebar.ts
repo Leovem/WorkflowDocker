@@ -15,12 +15,12 @@ export class SidebarComponent {
   isCollapsed = signal(false);
   isOpen = signal(false);
 
-  email = '';
   role = '';
   isAdmin = false;
+  userName = '';
 
   constructor(private authService: Auth) {
-    this.email = localStorage.getItem('user') || '';
+    this.userName = localStorage.getItem('user') || '';
     this.role = localStorage.getItem('role') || '';
     this.isAdmin = this.authService.hasAdminAccess();
   }
@@ -38,7 +38,7 @@ export class SidebarComponent {
     {
       title: 'Menú',
       items: [
-        { label: 'Inicio', path: '/dashboard', icon: this.HomeIcon }
+        { label: 'Inicio', path: '/home', icon: this.HomeIcon }
       ],
       allowedRoles: ['ROOT', 'ADMINISTRADOR', 'FUNCIONARIO', 'RECEPCIONISTA']
     },
@@ -49,6 +49,7 @@ export class SidebarComponent {
         { label: 'Roles', path: '/roles', icon: this.RolesIcon },
         { label: 'Departamentos', path: '/departamentos', icon: this.DeptosIcon },
         { label: 'Workflow', path: '/workflow', icon: this.WorkflowIcon },
+        { label: 'dashboard', path: '/dashboard', icon: this.AssetsIcon}
       ],
       allowedRoles: ['ROOT', 'ADMINISTRADOR']
     },

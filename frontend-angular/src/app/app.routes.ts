@@ -8,7 +8,13 @@ export const routes: Routes = [
     { path: 'login', component: Login },
     {
         path: 'dashboard',
-        loadComponent: () => import('./features/Acceso_y_Seguridad/dashboard/dashboard').then(m => m.Dashboard),
+        loadComponent: () => import ('./features/Intelegencia_y_Comunicacion/Analytics/dashboard').then(m => m.DashboardComponent),
+        canActivate: [authGuard, roleGuard]
+    },
+    {
+
+        path: 'home',
+        loadComponent: () => import('./features/Acceso_y_Seguridad/home/home').then(m => m.Home),
         canActivate: [authGuard]
     },
     {

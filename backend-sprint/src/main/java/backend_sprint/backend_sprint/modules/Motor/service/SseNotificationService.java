@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.springframework.scheduling.annotation.Scheduled; // 🚀 IMPORTANTE AÑADIR ESTO
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -45,31 +46,68 @@ public class SseNotificationService {
      * Envía una notificación a todos los funcionarios conectados de un departamento.
      */
     public void notifyDepartment(String departmentId, Object payload) {
-    List<SseEmitter> departmentEmitters = emitters.get(departmentId);
-    
-    if (departmentEmitters != null && !departmentEmitters.isEmpty()) {
-        // 1. Creamos una lista temporal para guardar los que fallaron
-        List<SseEmitter> deadEmitters = new ArrayList<>();
+        List<SseEmitter> departmentEmitters = emitters.get(departmentId);
         
-        // 2. Recorremos y enviamos
-        for (SseEmitter emitter : departmentEmitters) {
-            try {
-                emitter.send(SseEmitter.event()
-                        .name("NEW_TASK")
-                        .data(payload));
-            } catch (IOException | IllegalStateException e) {
-                // Si falla, lo marcamos como completado y lo anotamos en la lista negra
-                emitter.complete();
-                deadEmitters.add(emitter);
+        if (departmentEmitters != null && !departmentEmitters.isEmpty()) {
+            // 1. Creamos una lista temporal para guardar los que fallaron
+            List<SseEmitter> deadEmitters = new ArrayList<>();
+            
+            // 2. Recorremos y enviamos
+            for (SseEmitter emitter : departmentEmitters) {
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("NEW_TASK")
+                            .data(payload));
+                } catch (IOException | IllegalStateException e) {
+                    // Si falla, lo marcamos como completado y lo anotamos en la lista negra
+                    emitter.complete();
+                    deadEmitters.add(emitter);
+                }
+            }
+            
+            // 3. Borramos todos los inactivos de una sola vez FUERA del bucle
+            if (!deadEmitters.isEmpty()) {
+                departmentEmitters.removeAll(deadEmitters);
             }
         }
-        
-        // 3. Borramos todos los inactivos de una sola vez FUERA del bucle
-        if (!deadEmitters.isEmpty()) {
-            departmentEmitters.removeAll(deadEmitters);
-        }
     }
-}
+
+    /**
+     * 🚀 NUEVO: EL LATIDO (HEARTBEAT) ANTI-DESCONEXIÓN
+     * Se ejecuta automáticamente cada 45 segundos para mantener vivas las conexiones con el navegador.
+     */
+    @Scheduled(fixedRate = 45000)
+    public void sendHeartbeat() {
+        if (emitters.isEmpty()) {
+            return; // Si no hay nadie conectado en todo el sistema, no hacemos nada
+        }
+
+        // Recorremos todos los departamentos
+        emitters.forEach((departmentId, departmentEmitters) -> {
+            List<SseEmitter> deadEmitters = new ArrayList<>();
+
+            // Recorremos todos los funcionarios conectados en ese departamento
+            for (SseEmitter emitter : departmentEmitters) {
+                try {
+                    // Enviamos un evento invisible "ping"
+                    emitter.send(SseEmitter.event().name("ping").data("latido"));
+                } catch (IOException | IllegalStateException e) {
+                    // Si el envío falla (ej. el funcionario cerró la pestaña del navegador)
+                    emitter.complete();
+                    deadEmitters.add(emitter);
+                }
+            }
+
+            // Limpiamos la memoria borrando los emisores caídos
+            if (!deadEmitters.isEmpty()) {
+                departmentEmitters.removeAll(deadEmitters);
+                // Si el departamento se quedó vacío, lo quitamos del mapa principal
+                if (departmentEmitters.isEmpty()) {
+                    emitters.remove(departmentId);
+                }
+            }
+        });
+    }
 
     private void removeEmitter(String departmentId, SseEmitter emitter) {
         List<SseEmitter> departmentEmitters = emitters.get(departmentId);
@@ -80,5 +118,4 @@ public class SseNotificationService {
             }
         }
     }
-    
 }

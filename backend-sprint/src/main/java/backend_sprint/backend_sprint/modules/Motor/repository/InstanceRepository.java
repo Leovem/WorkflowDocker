@@ -16,4 +16,6 @@ public interface InstanceRepository extends MongoRepository<Instance, String> {
 
     // 🚀 NUEVO: Buscar todos los trámites de un usuario específico
     List<Instance> findByProfileId(String profileId);
+
+    Boolean existsByPolicyId(String id);
 }

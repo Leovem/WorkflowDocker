@@ -25,6 +25,18 @@ public class PolicyController {
         }
     }
 
+
+    @GetMapping("/active")
+    public ResponseEntity<?> getActivePolicies() {
+        try {
+            // Llamamos a un nuevo método del servicio que filtra por status = true
+            return ResponseEntity.ok(policyService.findActivePolicies());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getPolicyById(@PathVariable String id) {
         try {

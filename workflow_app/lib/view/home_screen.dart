@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../services//api_service.dart';
 import './detalle_tramite_screem.dart'; // La crearemos en el Paso 3
@@ -9,17 +10,73 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   List<dynamic> _tramites = [];
   bool _isLoading = true;
   String _errorMessage = '';
 
+  String _perfilId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); // 👈 Registramos el observador
+    _configurarEscuchadorSilencioso();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 👈 Limpiamos al salir
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Si la app acaba de volver al primer plano (se maximizó)
+    if (state == AppLifecycleState.resumed) {
+      print("🔄 La app volvió a abrirse. Refrescando datos por si acaso...");
+      _cargarTramitesSilencioso();
+    }
+  }
+
+  // 🚀 LA ANTENA RECEPTORA
+  void _configurarEscuchadorSilencioso() {
+    // onMessage escucha los mensajes mientras la app está en primer plano (abierta en pantalla)
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Verificamos si el mensaje trae nuestra palabra clave secreta en los 'data'
+      if (message.data['action'] == 'REFRESH_TRAMITES') {
+        print(
+          "🤫 ¡Señal silenciosa recibida! Actualizando lista en segundo plano...",
+        );
+
+        // Llamamos a tu método silencioso que ya tenías
+        _cargarTramitesSilencioso();
+      }
+    });
+  }
+
+  // Tu método silencioso de la vez pasada
+  Future<void> _cargarTramitesSilencioso() async {
+    if (_perfilId.isEmpty) return;
+    try {
+      final data = await _apiService.obtenerTramites(_perfilId);
+      if (mounted) {
+        setState(() {
+          _tramites = data;
+        });
+      }
+    } catch (e) {
+      print("Error recargando: $e");
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Obtenemos el ID que pasamos desde el Login
-    final String perfilId = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    final String perfilId =
+        ModalRoute.of(context)?.settings.arguments as String? ?? '';
     if (perfilId.isNotEmpty && _isLoading) {
       _cargarTramites(perfilId);
     }
@@ -61,9 +118,10 @@ class _HomeScreenState extends State<HomeScreen> {
     // 2. Volver al Login destruyendo todo el historial de navegación por seguridad
     if (context.mounted) {
       Navigator.pushNamedAndRemoveUntil(
-        context, 
+        context,
         '/login', // Cambia esto por la ruta de tu pantalla de login
-        (Route<dynamic> route) => false, // Este "false" destruye todas las pantallas anteriores
+        (Route<dynamic> route) =>
+            false, // Este "false" destruye todas las pantallas anteriores
       );
 
       /* NOTA: Si no usas rutas nombradas ('/login'), usa esto en su lugar:
@@ -81,7 +139,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
       appBar: AppBar(
-        title: const Text('Mis Trámites', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Mis Trámites',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF1A1A1A),
         iconTheme: const IconThemeData(color: Colors.tealAccent),
 
@@ -95,19 +156,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   backgroundColor: const Color(0xFF1E1E1E),
-                  title: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white)),
-                  content: const Text('¿Estás seguro de que deseas salir?', style: TextStyle(color: Colors.white70)),
+                  title: const Text(
+                    'Cerrar Sesión',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  content: const Text(
+                    '¿Estás seguro de que deseas salir?',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context), // Cierra el diálogo
-                      child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+                      onPressed: () =>
+                          Navigator.pop(context), // Cierra el diálogo
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(color: Colors.white54),
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context); // Cierra el diálogo
                         _cerrarSesion(context); // Llama a tu método
                       },
-                      child: const Text('Salir', style: TextStyle(color: Colors.redAccent)),
+                      child: const Text(
+                        'Salir',
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
                     ),
                   ],
                 ),
@@ -117,90 +191,119 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.tealAccent))
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.tealAccent),
+            )
           : _errorMessage.isNotEmpty
-              ? Center(child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.redAccent)))
-              : _tramites.isEmpty
-                  ? const Center(child: Text('No tienes trámites en curso.', style: TextStyle(color: Colors.white54)))
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _tramites.length,
-                      itemBuilder: (context, index) {
-                        final tramite = _tramites[index];
-                        
-                        return Card(
-                          color: const Color(0xFF1E1E1E),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Colors.white12, width: 1),
-                          ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                              // 🚀 Navegamos a la vista de detalle y le pasamos todo el JSON de este trámite
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetalleTramiteScreen(tramiteData: tramite),
+          ? Center(
+              child: Text(
+                'Error: $_errorMessage',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            )
+          : _tramites.isEmpty
+          ? const Center(
+              child: Text(
+                'No tienes trámites en curso.',
+                style: TextStyle(color: Colors.white54),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _tramites.length,
+              itemBuilder: (context, index) {
+                final tramite = _tramites[index];
+
+                return Card(
+                  color: const Color(0xFF1E1E1E),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.white12, width: 1),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      // 🚀 Navegamos a la vista de detalle y le pasamos todo el JSON de este trámite
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DetalleTramiteScreen(tramiteData: tramite),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  tramite['workflowName'] ?? 'Sin Nombre',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.tealAccent,
+                                  ),
                                 ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          tramite['workflowName'] ?? 'Sin Nombre',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.tealAccent,
-                                          ),
-                                        ),
-                                      ),
-                                      // Chip de Estado
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.teal.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          tramite['status'] ?? 'PENDIENTE',
-                                          style: const TextStyle(fontSize: 12, color: Colors.tealAccent),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    tramite['workflowDescription'] ?? 'Sin descripción',
-                                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16, color: Colors.white54),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Última act: ${_formatearFecha(tramite['updatedAt'])}',
-                                        style: const TextStyle(color: Colors.white54, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ],
                               ),
+                              // Chip de Estado
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  tramite['status'] ?? 'PENDIENTE',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.tealAccent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            tramite['workflowDescription'] ?? 'Sin descripción',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
                             ),
                           ),
-                        );
-                      },
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Colors.white54,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Última act: ${_formatearFecha(tramite['updatedAt'])}',
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

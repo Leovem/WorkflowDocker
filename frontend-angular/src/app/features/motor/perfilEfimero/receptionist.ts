@@ -41,7 +41,7 @@ export class ReceptionistComponent implements OnInit {
     }
 
     loadPolicies() {
-        this.ApiService.getPoliticas().subscribe(policies => {
+        this.ApiService.getPoliticasActivos().subscribe(policies => {
             this.policies = policies;
             console.log(this.policies);
         });

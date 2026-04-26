@@ -65,7 +65,7 @@ export class Login {
         }
         // =========================================================
 
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         this.isLoading = false;

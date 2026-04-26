@@ -24,10 +24,10 @@
       [class]="'pt-6 pb-4 px-4 flex flex-col items-center border-b border-[#262626] transition-all duration-300 ' + (isCollapsed() ? 'opacity-0 h-0 overflow-hidden mb-0' : 'opacity-100 mb-4')">
       <div
         class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/30 mb-2 shadow-lg shadow-emerald-950">
-        <span class="text-emerald-500 text-xl font-black">P</span>
+        <span class="text-emerald-500 text-xl font-black">{{ userName ? userName.charAt(0).toUpperCase() : 'P' }}</span>
       </div>
       <div class="text-center w-full">
-        <h3 class="text-white font-bold text-[10px] uppercase tracking-tighter truncate px-2">{{ email }}</h3>
+        <h3 class="text-white font-bold text-[10px] uppercase tracking-tighter truncate px-2">{{ userName }}</h3>
         <span
           class="text-[8px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-md font-black uppercase tracking-widest border border-emerald-500/20 mt-1 inline-block">
           {{ role }}

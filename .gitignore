@@ -4,3 +4,5 @@
 /backend-sprint/.env_docker
 /backend-fastApi/.env
 /backend-fastApi/.env_docker
+workflow-app.pem
+/backend-sprint/src/main/resources/workflow-app-firebase-key.json

@@ -16,6 +16,11 @@ export class ApiService {
         return this.http.get<Policy[]>(`${this.apiUrl}/api/policies`);
     }
 
+
+    getPoliticasActivos(): Observable<Policy[]> {
+        return this.http.get<Policy[]>(`${this.apiUrl}/api/policies/active`)
+    }
+
     getPolitica(id: string): Observable<any> {
         return this.http.get<Policy>(`${this.apiUrl}/api/policies/${id}`);
     }

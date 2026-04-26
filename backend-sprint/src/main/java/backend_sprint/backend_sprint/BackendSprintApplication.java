@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import backend_sprint.backend_sprint.modules.Acceso_y_Seguridad.model.Role;
@@ -14,6 +15,7 @@ import backend_sprint.backend_sprint.modules.Acceso_y_Seguridad.repository.RoleR
 import backend_sprint.backend_sprint.modules.Acceso_y_Seguridad.repository.UserRepository;
 
 @SpringBootApplication
+@EnableScheduling
 public class BackendSprintApplication {
 
     public static void main(String[] args) {

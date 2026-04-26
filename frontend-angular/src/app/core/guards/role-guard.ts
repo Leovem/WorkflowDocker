@@ -9,7 +9,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   if (authService.hasAdminAccess()) {
     return true;
   } else {
-    router.navigate(['/dashboard']); // O a una vista Not Authorized si existe
+    router.navigate(['/home']); // O a una vista Not Authorized si existe
     return false;
   }
 };
@@ -21,7 +21,7 @@ export const receptionistGuard: CanActivateFn = (route, state) => {
   if (authService.hasReceptionistAccess()) {
     return true;
   } else {
-    router.navigate(['/dashboard']); // O a una vista Not Authorized si existe
+    router.navigate(['/home']); // O a una vista Not Authorized si existe
     return false;
   }
 };
@@ -33,7 +33,7 @@ export const funcionarioGuard: CanActivateFn = (route, state) => {
   if (authService.hasFuncionarioAccess()) {
     return true;
   } else {
-    router.navigate(['/dashboard']); // O a una vista Not Authorized si existe
+    router.navigate(['/home']); // O a una vista Not Authorized si existe
     return false;
   }
 };

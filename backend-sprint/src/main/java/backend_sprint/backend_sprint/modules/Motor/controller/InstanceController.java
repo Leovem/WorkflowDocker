@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -128,10 +129,13 @@ public class InstanceController {
 
     @PostMapping("/{id}/complete/{nodeId}")
     public ResponseEntity<?> completarTarea(@PathVariable String id, @PathVariable String nodeId, @RequestBody Map<String, Object> formData) {
+
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
         System.out.println("✅ [COMPLETE] Petición para completar tarea en instancia: " + id + ", nodo: " + nodeId);
         System.out.println("Datos recibidos para completar la tarea: " + formData);
         try {
-            Instance resultado = instanceService.completarTareaHumana(id, nodeId, formData);
+            Instance resultado = instanceService.completarTareaHumana(id, nodeId, formData, currentUser);
             return ResponseEntity.ok(Map.of(
                 "message", "Tarea completada y motor avanzado exitosamente",
                 "instance", resultado

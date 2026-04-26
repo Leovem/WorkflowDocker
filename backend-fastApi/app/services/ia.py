@@ -1,10 +1,15 @@
 from fastapi import APIRouter, HTTPException
-from app.services.modelo import jarvis_assistant
+from app.services.modelo import jarvis_assistant, generate_content
+import json
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 ia_router = APIRouter()
 
+
+class SmartFillRequest(BaseModel):
+    transcription: str
+    fields: list[str]
 
 class DiagramSnapshot(BaseModel):
     nodes: List[Dict[str, Any]]
@@ -39,3 +44,26 @@ async def ask_copilot(request: CopilotRequest):
     except Exception as e:
         print(f"❌ Error en la ruta /ask: {str(e)}")
         raise HTTPException(status_code=500, detail="Error de comunicación con el asistente IA.")
+    
+    
+@ia_router.post("/jarvis/smart-fill")
+async def smart_form_fill(req: SmartFillRequest):
+    system_prompt = f"""
+    Eres Jarvis, un asistente de extracción de datos.
+    El usuario (un funcionario) ha narrado un caso por voz. Su transcripción es: "{req.transcription}"
+    
+    Tu tarea es extraer la información de esa narración y asignarla a los siguientes campos del formulario: {req.fields}
+    
+    REGLAS:
+    1. Si la narración menciona algo que encaja en un campo, asígnalo.
+    2. Si un campo no se menciona, pon su valor como "".
+    3. Responde ÚNICAMENTE con un JSON válido donde las claves sean los nombres de los campos.
+    """
+    
+    print(f"orden en texto: {req.transcription}")
+    print(f"campos a llenar: {req.fields}")
+    response = generate_content(system_prompt)
+    
+    raw_json = response.text.replace("```json", "").replace("```", "").strip()
+    
+    return json.loads(raw_json)

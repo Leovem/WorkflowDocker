@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { VoiceService} from '../../../features/motor/funcionario/service/voice.service';
+import { Subscription } from 'rxjs';
 
 // Interfaz para definir cualquier campo dinámico
 export interface DynamicField {
@@ -37,7 +39,7 @@ export interface ModalConfig {
     imports: [CommonModule, ReactiveFormsModule],
     templateUrl: './dynamic-modal-task.component.html',
 })
-export class DynamicModalTaskComponent implements OnChanges {
+export class DynamicModalTaskComponent implements OnChanges, OnDestroy {
     @Input() isOpen: boolean = false;
     @Input() config!: ModalConfig;
 
@@ -48,9 +50,55 @@ export class DynamicModalTaskComponent implements OnChanges {
 
     actualFiles: { [key: string]: File } = {};
 
-    constructor(private fb: FormBuilder) {
+    public isProcessingAudio = false;
+    private voiceSub!: Subscription;
+
+    constructor(
+        private fb: FormBuilder,
+        public voiceService: VoiceService,
+        private cdr: ChangeDetectorRef,
+    ) {
         this.form = this.fb.group({});
+
+        this.voiceSub = this.voiceService.transcript$.subscribe((text) => {
+            this.handleSmartFill(text);
+        });
     }
+
+
+    private handleSmartFill(text: string) {
+        if (!this.config?.customFields) return;
+
+        const fieldNames = this.config.customFields.map(f => f.name);
+
+        this.voiceService.smartFill(text, fieldNames).subscribe({
+            next: (mappedData) => {
+                this.form.patchValue(mappedData);
+                this.voiceService.isProcessing$.next(false);
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.voiceService.isProcessing$.next(false);
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+
+    ngOnDestroy() {
+        if (this.voiceSub) this.voiceSub.unsubscribe();
+    }
+
+
+    toggleVoice(){
+        if (this.voiceService.isListening) {
+            this.voiceService.stopListening();
+        } else {
+            this.voiceService.startListening();
+        }
+    }
+
+
 
     ngOnChanges(changes: SimpleChanges): void {
         // Si el modal se abre o cambia la configuración, reconstruimos el formulario

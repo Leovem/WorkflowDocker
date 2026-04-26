@@ -16,4 +16,6 @@ public interface PolicyService {
 
     Map<String, Object> getPolicyJsonById(String id);
 
+    List<Map<String, Object>> findActivePolicies();
+
 }

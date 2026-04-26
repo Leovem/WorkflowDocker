@@ -112,3 +112,29 @@ def jarvis_assistant(user_prompt: str, current_diagram: dict) -> dict:
             "hasAction": False,
             "actionPayload": None
         }
+        
+        
+def generate_content(prompt: str):
+  """
+  Se cominica con Gemini, le envia el prompt de extraccion de voz y devuelve la respuesta.
+  Fuerza a la IA a responder estrictamente en formato JSON.
+  """
+  try:
+    response = model.generate_content(
+      prompt,
+      generation_config=genai.GenerationConfig(
+        response_mime_type="application/json"
+      )
+    )
+    return response
+  
+  except Exception as e:
+        print(f"❌ Error interno conectando con Gemini en generate_content: {str(e)}")
+        
+        # En caso de que se caiga el internet o la API falle, 
+        # devolvemos un objeto "falso" (mock) que tenga la propiedad .text 
+        # devolviendo un JSON vacío para que Angular no colapse.
+        class ErrorResponse:
+            text = "{}"
+            
+        return ErrorResponse()

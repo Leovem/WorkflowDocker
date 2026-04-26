@@ -34,6 +34,17 @@ Finalmente, la salida del Merge debe ir a una última tarea llamada 'Emitir Tít
 
 
 
+username= eliaspumaclaure48_db_user
+password= Ysoy9jQacbzGuwqH
+
+
+
+
+
+
+
+
+
 
 
 
@@ -436,3 +447,29 @@ Eliminación en Cascada: Al finalizar un trámite (nodo "Fin"), el backend debe 
 Referencia Cruzada: Versiones_Workflow en SQL apunta al _id de Workflow_Definitions en MongoDB para que el sistema sepa qué versión del JSON debe cargar.
 
 Detección de Anomalías: El campo historial_ejecucion en MongoDB es la fuente para que la IA y el Dashboard calculen los retrasos y rebotes entre departamentos.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

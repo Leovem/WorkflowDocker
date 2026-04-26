@@ -8,6 +8,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import backend_sprint.backend_sprint.modules.Acceso_y_Seguridad.repository.DepartamentRepository;
+import backend_sprint.backend_sprint.modules.Inteligencia_y_Comunicacion.service.BitacoraService;
+import backend_sprint.backend_sprint.modules.Inteligencia_y_Comunicacion.service.FcmNotificationService;
 import backend_sprint.backend_sprint.modules.Motor.model.EphemeralProfile;
 import backend_sprint.backend_sprint.modules.Motor.model.Instance;
 import backend_sprint.backend_sprint.modules.Motor.repository.EphemeralProfileRepository;
@@ -19,15 +22,19 @@ public class ProcessPolicy {
     private final InstanceRepository instanceRepo;
     private final SseNotificationService ssenotificationService; 
     private final FcmNotificationService pushService;
+    private final BitacoraService bitacoraService;
+    private final DepartamentRepository dptoRepository;
         
     public ProcessPolicy(EphemeralProfileRepository profileRepo, 
                          InstanceRepository instanceRepo,
                          SseNotificationService ssenotificationService,
-                         FcmNotificationService fcmNotificationService) {
+                         FcmNotificationService fcmNotificationService, BitacoraService bitacoraService, DepartamentRepository dptoRepository) {
         this.profileRepo = profileRepo;
         this.instanceRepo = instanceRepo;
         this.ssenotificationService = ssenotificationService;
         this.pushService = fcmNotificationService;
+        this.bitacoraService = bitacoraService;
+        this.dptoRepository = dptoRepository;
     }
 
     /**
@@ -164,6 +171,27 @@ public class ProcessPolicy {
 
                 case "action":
                 case "actividad":
+
+
+
+
+                    String deptoId = instance.getCurrentDepartmentId();
+                    
+                    // 🚀 REGISTRO DE ASIGNACIÓN PARA ANALÍTICA
+                    if (!nodeAlreadyVisited) {
+                        // Obtenemos el nombre del depto (usando la lógica que vimos antes)
+                        String deptoName = "Departamento Desconocido";
+                        var deptoObj = dptoRepository.findById(deptoId).orElse(null);
+                        if (deptoObj != null) deptoName = deptoObj.getName();
+
+                        String policyName = (String) policy.get("name");
+
+                        // Guardamos en la bitácora analítica como PENDIENTE
+                        bitacoraService.logBitacoraAssignment(instance, currentNode, deptoId, deptoName, policyName);
+                    }
+
+                    System.out.println("✋ ACTIVIDAD HUMANA REQUERIDA. Pausando motor.");
+
                     if ("RUNNING-1".equals(instance.getStatus())) {
                         System.out.println("🟢 Actividad Humana completada. Buscando siguiente conexión...");
                         String nextNode = findNextNodeId(policy, currentId, null);
@@ -182,9 +210,6 @@ public class ProcessPolicy {
                         break;
                     }
 
-                    // Si es la PRIMERA VEZ que el motor llega a esta tarea, hace todo el ruido normal:
-                    String deptoId = instance.getCurrentDepartmentId();
-                    
                     System.out.println("✋ ACTIVIDAD HUMANA REQUERIDA. Pausando motor.");
                     System.out.println("🏢 Asignando trámite al departamento ID: " + deptoId);
                     
@@ -377,7 +402,7 @@ public class ProcessPolicy {
     /**
      * 🚀 NUEVO: Método para reanudar el flujo después de una tarea humana
      */
-    public Instance continuarMotor(Instance instance, Map<String, Object> policyJson, Map<String, Object> formData) {
+    public Instance continuarMotor(Instance instance, Map<String, Object> policyJson, Map<String, Object> formData, String userName) {
         System.out.println("\n▶️ --- DESPERTANDO MOTOR ---");
         System.out.println("📄 Trámite ID: " + instance.getId());
         System.out.println("📥 Respuesta de la tarea: " + formData);
@@ -397,9 +422,12 @@ public class ProcessPolicy {
             // 🚀 NUEVO: SISTEMA DE AUDITORÍA (Guardar cada envío sin sobrescribir)
             // =======================================================================
             Map<String, Object> submissionRecord = new HashMap<>();
-            submissionRecord.put("nodeId", instance.getCurrentNodeId());
+            String currentId = instance.getCurrentNodeId();
+            submissionRecord.put("nodeId", currentId);
             submissionRecord.put("action", "USER_SUBMIT");
-            submissionRecord.put("timestamp", LocalDateTime.now().toString());
+
+            LocalDateTime submitTime = LocalDateTime.now();
+            submissionRecord.put("timestamp", submitTime.toString());
             submissionRecord.put("departmentId", instance.getCurrentDepartmentId());
             submissionRecord.put("submittedData", formData); // <-- ¡Aquí se guarda el historial eterno!
 
@@ -408,6 +436,35 @@ public class ProcessPolicy {
             history.add(submissionRecord);
             instance.setHistory(history);
             // =======================================================================
+
+            // =======================================================================
+            // 🚀 ACTUALIZAR LA TAREA EN LA BITÁCORA PARA ANALÍTICA
+            // Se cierra el registro 'PENDING' calculando duración exacta
+            // =======================================================================
+            try {
+                // 1. Extraer si hubo archivos adjuntos
+                boolean hasMedia = false;
+                if (formData.containsKey("nodo")) {
+                    Map<String, Object> nodoInfo = (Map<String, Object>) formData.get("nodo");
+                    hasMedia = nodoInfo.containsKey("media") && nodoInfo.get("media") != null;
+                }
+
+                // 2. Determinar la acción enviada
+                String action = "SUBMITTED"; 
+
+                // 3. Llamar al servicio simplificado
+                bitacoraService.updateTaskCompletion(
+                    instance.getId(), 
+                    currentId, 
+                    userName, 
+                    action, 
+                    hasMedia
+                );
+            } catch (Exception e) {
+                System.out.println("⚠️ Error no fatal al actualizar la bitácora analítica: " + e.getMessage());
+            }
+            // =======================================================================
+            
         }
 
         try {
