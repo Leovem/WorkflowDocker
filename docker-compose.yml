@@ -14,14 +14,14 @@ services:
 #      - postgres_data:/var/lib/postgresql/data
 
   
-  mongo_db:
-    image: mongo:latest
-    container_name: parcial_mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+#  mongo_db:
+#    image: mongo:latest
+#    container_name: parcial_mongo
+#    restart: always
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - mongo_data:/data/db
 
   
   redis_cache:
@@ -103,5 +103,5 @@ services:
 #      - backend
 
 volumes:
-  postgres_data:
+#  postgres_data:
   mongo_data:
