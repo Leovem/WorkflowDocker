@@ -39,9 +39,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Origen de tu Angular
-        configuration.setAllowedOrigins(List.of("http://workflow-puma.s3-website-us-east-1.amazonaws.com"));
-        configuration.setAllowedOrigins(List.of("https://d2oa5maju2bq22.cloudfront.net"));
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:4200",
+            "http://workflow-puma.s3-website-us-east-1.amazonaws.com",
+            "https://d2oa5maju2bq22.cloudfront.net"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
