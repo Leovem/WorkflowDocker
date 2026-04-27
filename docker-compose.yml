@@ -42,8 +42,8 @@ services:
       - ./backend-fastApi/.env_docker
     volumes:
       - ./backend-fastApi:/app
-    depends_on:
-      - mongo_db
+#    depends_on:
+#      - mongo_db
 
 
 
@@ -61,8 +61,8 @@ services:
       - ./backend-sprint:/app     
       - ~/.m2:/root/.m2           
     command: ./mvnw spring-boot:run
-    depends_on:
-      - mongo_db
+#    depends_on:
+#      - mongo_db
 
 
 

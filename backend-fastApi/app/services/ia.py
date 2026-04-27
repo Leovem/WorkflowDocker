@@ -1,10 +1,23 @@
 from fastapi import APIRouter, HTTPException
-from app.services.modelo import jarvis_assistant, generate_content
+from app.services.modelo import jarvis_assistant, generate_content, analizar_bitacora_con_ia
 import json
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 ia_router = APIRouter()
+
+class BitacoraEntry(BaseModel):
+    action: str
+    nodeName: str
+    policyName: str
+    timing: Dict[str, Any]
+    user: Dict[str, Any]
+    # Agregamos los demás campos como opcionales para evitar el 422 si faltan
+    id: Optional[str] = None
+    instanceId: Optional[str] = None
+    nodeId: Optional[str] = None
+    policyId: Optional[str] = None
+    hasMultimedia: Optional[bool] = None
 
 
 class SmartFillRequest(BaseModel):
@@ -67,3 +80,44 @@ async def smart_form_fill(req: SmartFillRequest):
     raw_json = response.text.replace("```json", "").replace("```", "").strip()
     
     return json.loads(raw_json)
+
+
+
+
+@ia_router.post("/jarvis/analisis")
+async def jarvis_analisis(bitacora: List[BitacoraEntry]):
+    # 1. Procesamiento rápido de datos
+    total_tareas = len(bitacora)
+    
+
+    tiempos = [t.timing['durationMinutes'] for t in bitacora]
+    
+    promedio = sum(tiempos) / total_tareas if total_tareas > 0 else 0
+    
+
+    funcionario_lento = max(bitacora, key=lambda x: x.timing['durationMinutes'])
+    
+    resumen = (f"Se procesaron {total_tareas} tareas. El tiempo promedio es {promedio} min. "
+               f"La tarea más lenta fue '{funcionario_lento.nodeName}' "
+               f"por {funcionario_lento.user['name']} con {funcionario_lento.timing['durationMinutes']} min.")
+
+
+    response = analizar_bitacora_con_ia(resumen)
+    
+
+    # ✅ EXTRAEMOS EL TEXTO REAL
+    try:
+        # Si generate_content devuelve el objeto de Gemini, usamos .text
+        comentario_ia = response.text 
+    except Exception as e:
+        print(f"Error extrayendo texto de Gemini: {e}")
+        comentario_ia = "{}" # Fallback seguro
+
+    return {
+        "stats": {
+            "promedio": promedio,
+            "total": total_tareas,
+            "anomalia": funcionario_lento
+        },
+        "jarvis_speech": comentario_ia
+    }

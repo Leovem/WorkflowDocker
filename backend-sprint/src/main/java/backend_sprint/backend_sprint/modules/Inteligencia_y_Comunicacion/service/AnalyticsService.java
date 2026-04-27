@@ -35,7 +35,7 @@ public class AnalyticsService {
             Aggregation.limit(10)
         );
 
-        AggregationResults<ChartItemDTO> results = mongoTemplate.aggregate(agg, "task_executions", ChartItemDTO.class);
+        AggregationResults<ChartItemDTO> results = mongoTemplate.aggregate(agg, "Bitacora", ChartItemDTO.class);
         return results.getMappedResults();
     }
 
@@ -47,7 +47,7 @@ public class AnalyticsService {
             Aggregation.sort(Sort.Direction.DESC, "count")
         );
 
-        AggregationResults<ChartItemDTO> results = mongoTemplate.aggregate(agg, "task_executions", ChartItemDTO.class);
+        AggregationResults<ChartItemDTO> results = mongoTemplate.aggregate(agg, "Bitacora", ChartItemDTO.class);
         return results.getMappedResults();
     }
 
@@ -58,6 +58,6 @@ public class AnalyticsService {
         query.with(Sort.by(Sort.Direction.DESC, "timing.completedAt"));
         query.limit(50);
         
-        return mongoTemplate.find(query, Bitacora.class, "task_executions");
+        return mongoTemplate.find(query, Bitacora.class, "Bitacora");
     }
 }

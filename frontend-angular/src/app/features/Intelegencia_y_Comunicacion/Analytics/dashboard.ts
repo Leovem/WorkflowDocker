@@ -3,21 +3,39 @@ import { AnalyticsService, DashboardData } from '../Analytics/service/analytics.
 import { NgApexchartsModule } from 'ng-apexcharts'; // 👈 1. Importar esto
 import { CommonModule } from '@angular/common'; // Asegúrate de tener CommonModule para el *ngIf y *ngFor
 
+
+
+interface JarvisResponse {
+  analisis_rendimiento?: {
+    asistente: string;
+    cuello_de_botella: string;
+    reconocimiento: string;
+    sugerencias_mejora: string[];
+    estado_sistema: string;
+    estabilidad_confirmada?: string;
+  };
+}
+
+
+
+
 @Component({
   selector: 'app-dashboard',
   standalone: true, // Si dice true, el import de abajo es OBLIGATORIO
   imports: [CommonModule, NgApexchartsModule], // 👈 2. Agregarlo aquí
   templateUrl: './dashboard.html',
 })
+
 export class DashboardComponent implements OnInit {
   
-  // Opciones para el Gráfico de Funcionarios (Barras)
+  
   public chartFuncionarios: any;
   
-  // Opciones para el Gráfico de Políticas (Donut)
+  
   public chartPoliticas: any;
 
-  // Anomalías (Las llenaremos con Jarvis después)
+  public jarvisData: JarvisResponse | null = null;
+  public jarvisMessage: string = '';
   public anomaliesDetected: any[] = [];
   public isScanning = false;
 
@@ -72,15 +90,50 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+
+
+  private normalizeJarvisData(raw: any): JarvisResponse {
+  // Buscamos el objeto de análisis sin importar si se llama 'informe_rendimiento' o 'analisis_rendimiento'
+  const data = raw.analisis_rendimiento || raw.informe_rendimiento || {};
+  
+  return {
+    analisis_rendimiento: {
+      asistente: data.asistente || 'Jarvis',
+      // Normalizamos campos que Gemini suele cambiar (plural/singular)
+      cuello_de_botella: data.cuello_de_botella || data.cuellos_de_botella || 'Sin anomalías detectadas.',
+      reconocimiento: data.reconocimiento || data.reconocimientos || 'Buen trabajo del equipo.',
+      sugerencias_mejora: data.sugerencias_mejora || [],
+      estado_sistema: data.estado_sistema || data.nota_final || 'Sistema estable.'
+    }
+  };
+}
+
   runJarvisAudit() {
     this.isScanning = true;
-    // Aquí conectaremos con FastAPI en el siguiente paso.
-    // Por ahora simulamos una carga.
-    setTimeout(() => {
-      this.isScanning = false;
-      this.anomaliesDetected = [
-        { tramiteId: '69ed7eb13', reason: 'El trámite tomó 400% más tiempo del promedio histórico para la política "Titulación".', severity: 'alta' }
-      ];
-    }, 2000);
+
+    this.anomaliesDetected = [];
+    this.jarvisMessage = '';
+
+    this.analyticsService.getRecentTasks().subscribe({
+      next: async (tasks) => {
+        await this.analyticsService.getJarvisAnalysis(tasks).subscribe({
+          next: (res) => {
+            this.isScanning = false;
+            try {
+              const parsed = JSON.parse(res.jarvis_speech.replace(/```json|```/g, '').trim());
+              // Aplicamos la normalización antes de asignar a la vista
+              this.jarvisData = this.normalizeJarvisData(parsed);
+            } catch (e) {
+              console.error("Error de parseo:", e);
+            }
+          }
+        });
+      },
+      error: (err) => {
+        this.isScanning = false;
+        console.error("Error obteniendo tareas para Jarvis: ", err);
+      }
+    })
+
   }
 }

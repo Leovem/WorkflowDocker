@@ -17,6 +17,7 @@ export interface DashboardData {
 export class AnalyticsService {
   // Ajusta esta URL a la de tu backend de Spring Boot
   private apiUrl = `${environment.apiUrl}/analytics`; 
+  private iaApiUrl = `${environment.iaApiUrl}`
 
   constructor(private http: HttpClient) {}
 
@@ -27,5 +28,10 @@ export class AnalyticsService {
   // Este lo usaremos pronto para enviarle los datos a Jarvis
   getRecentTasks(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/recent-tasks`);
+  }
+
+
+  getJarvisAnalysis(bitacora: any[]): Observable<any> {
+    return this.http.post(`${this.iaApiUrl}/jarvis/analisis`, bitacora);
   }
 }

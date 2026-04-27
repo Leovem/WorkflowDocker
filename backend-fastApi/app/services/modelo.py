@@ -138,3 +138,38 @@ def generate_content(prompt: str):
             text = "{}"
             
         return ErrorResponse()
+      
+      
+
+RESTRICTED_SCHEMA = """
+REGLA DE FORMATO OBLIGATORIA:
+Tu respuesta debe ser UNICAMENTE un JSON con esta estructura exacta. 
+Si no sigues este esquema, el sistema fallará.
+{
+  "analisis_rendimiento": {
+    "asistente": "Jarvis",
+    "cuello_de_botella": "Descripción del retraso",
+    "reconocimiento": "Felicitación al equipo",
+    "sugerencias_mejora": ["Sugerencia 1", "Sugerencia 2"],
+    "estado_sistema": "Conclusión final"
+  }
+}
+"""
+
+def analizar_bitacora_con_ia(resumen_estadistico: str):
+    # Combinamos el prompt original con la regla de esquema
+    prompt = f"""
+    Actúa como Jarvis, el asistente inteligente. 
+    Analiza estos datos: {resumen_estadistico}.
+    
+    {RESTRICTED_SCHEMA}
+    """
+    
+    # Usamos response_mime_type para forzar JSON
+    response = model.generate_content(
+      prompt,
+      generation_config=genai.GenerationConfig(
+        response_mime_type="application/json"
+      )
+    )
+    return response

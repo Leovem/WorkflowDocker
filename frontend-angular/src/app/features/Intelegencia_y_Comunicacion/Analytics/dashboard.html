@@ -58,21 +58,45 @@
         </button>
       </div>
       
-      <div class="space-y-3">
-        <div *ngIf="anomaliesDetected.length === 0 && !isScanning" class="text-neutral-500 text-sm italic">
-          Presiona 'Escanear Historial' para que la IA busque cuellos de botella.
-        </div>
-
-        <div *ngFor="let anomaly of anomaliesDetected" 
-             class="border-l-2 border-red-500 bg-red-500/5 hover:bg-red-500/10 transition-colors p-4 rounded-r-lg">
-          <p class="font-mono text-xs text-red-400 mb-1 flex justify-between">
-            <span>Trámite ID: {{ anomaly.tramiteId }}</span>
-            <span class="uppercase tracking-wider opacity-80">{{ anomaly.severity }}</span>
-          </p>
-          <p class="text-sm text-neutral-300">{{ anomaly.reason }}</p>
-        </div>
+      <div *ngIf="isScanning" class="mt-4 flex items-center gap-3 text-purple-400 italic text-sm">
+        <div class="loader"></div> <span>Jarvis está procesando los tensores de rendimiento...</span>
       </div>
+
+      <div *ngIf="jarvisData" class="mt-6 space-y-6 animate-fade-in">
+  
+  <div class="p-4 bg-emerald-500/10 border-l-4 border-emerald-500">
+    <p class="text-xs font-black text-emerald-500 uppercase">Estado del Sistema</p>
+    <p class="text-sm text-neutral-200 italic">
+      "{{ jarvisData?.analisis_rendimiento?.estado_sistema }}"
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+      <h4 class="text-red-400 text-xs font-bold uppercase mb-2">Cuello de Botella</h4>
+      <p class="text-sm text-neutral-300">
+        {{ jarvisData?.analisis_rendimiento?.cuello_de_botella }}
+      </p>
     </div>
+
+    <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+      <h4 class="text-blue-400 text-xs font-bold uppercase mb-2">Reconocimiento</h4>
+      <p class="text-sm text-neutral-300">
+        {{ jarvisData?.analisis_rendimiento?.reconocimiento }}
+      </p>
+    </div>
+  </div>
+
+  <div class="p-4 bg-[#1a1a1a] border border-neutral-800 rounded-lg">
+    <h4 class="text-purple-400 text-xs font-bold uppercase mb-3">Sugerencias</h4>
+    <ul class="space-y-2">
+      <li *ngFor="let sugerencia of jarvisData?.analisis_rendimiento?.sugerencias_mejora" 
+          class="text-sm text-neutral-400">
+        • {{ sugerencia }}
+      </li>
+    </ul>
+  </div>
+</div>
 
   </div>
 </div>
