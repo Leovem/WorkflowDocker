@@ -24,10 +24,10 @@ public class EmailNotificationService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(toEmail);
-            helper.setSubject("Acceso a su Trámite Universitario");
+            helper.setSubject("Acceso a su Trámite");
 
             // URL del frontend donde el usuario pegará su token (Ajusta el dominio)
-            String loginUrl = "http://localhost:4200/seguimiento?token=" + token;
+            String loginUrl = "https://drive.google.com/file/d/1nQkLWO9eeLHxXdXGqJjhb3LrEMXB035r/view?usp=sharing";
 
             // Plantilla HTML profesional
             String htmlContent = "<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;'>"

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Role } from '../../roles/services/role.service';
 import { Department } from '../../departments/services/department.service';
+import { environment } from '../../../../../environments/environment';
 
 export interface User {
   id?: string;
@@ -27,7 +28,8 @@ export interface UserRequest {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8080/api/users';
+  //private apiUrl = 'http://localhost:8080/api/users';
+  private apiUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) { }
 

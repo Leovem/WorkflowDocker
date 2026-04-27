@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +14,8 @@ export class WebSocketService {
             return;
         }
 
-        const wsUrl = `http://localhost:8000/ws/design/${policyId}/${user}`;
+        //const wsUrl = `http://localhost:8000/ws/design/${policyId}/${user}`;
+        const wsUrl = `${environment.iaApiUrl}/ws/design/${policyId}/${user}`; 
         this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {

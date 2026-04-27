@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // ⚠️ ATENCIÓN: Si usas el emulador de Android, localhost no funciona. 
+  // ⚠️ ATENCIÓN: Si usas el emulador de Android, localhost no funciona.
   // Debes usar 10.0.2.2. Si usas iOS o Web, deja localhost.
-  static const String baseUrl = 'http://192.168.1.41:8080/api/profiles'; 
+  //static const String baseUrl = 'http://192.168.1.41:8080/api/profiles';
+  static const String baseUrl = 'http://3.92.84.71:8080/api/profiles';
 
   Future<Map<String, dynamic>> loginConToken(String token) async {
     try {
@@ -23,18 +24,18 @@ class ApiService {
 
       // Si el login fue exitoso (Código 200)
       if (response.statusCode == 200) {
-        return responseData; 
-      } 
+        return responseData;
+      }
       // Manejo de errores específicos del backend (400, 401, 403)
       else {
-        throw Exception(responseData['message'] ?? 'Error desconocido al iniciar sesión');
+        throw Exception(
+          responseData['message'] ?? 'Error desconocido al iniciar sesión',
+        );
       }
     } catch (e) {
       throw Exception('Error de conexión: $e');
     }
   }
-
-
 
   // 🚀 NUEVO: Método para enviar el FCM Token al backend
   Future<void> updateFcmToken(String accessToken, String fcmToken) async {
@@ -47,7 +48,7 @@ class ApiService {
         },
         body: jsonEncode({
           'accessToken': accessToken, // El token que usaste para hacer login
-          'fcmToken': fcmToken,       // El token único del celular
+          'fcmToken': fcmToken, // El token único del celular
         }),
       );
 
@@ -62,14 +63,12 @@ class ApiService {
     }
   }
 
-
-
-// 🚀 NUEVO: Obtener la lista de trámites del usuario
+  // 🚀 NUEVO: Obtener la lista de trámites del usuario
   Future<List<dynamic>> obtenerTramites(String profileId) async {
     try {
       // Ajusta la URL si tu controlador se llama /api/instances o /api/profiles
       final url = Uri.parse('$baseUrl/profile/$profileId');
-      
+
       final response = await http.get(
         url,
         headers: {
@@ -87,5 +86,4 @@ class ApiService {
       throw Exception('Error de conexión: $e');
     }
   }
-
 }

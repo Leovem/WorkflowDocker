@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http'
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
-  private apiUrl = "http://localhost:8080/api/auth";
-  //private apiUrl = API_URL;
+  //private apiUrl = "http://localhost:8080/api/auth";
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) { }
 

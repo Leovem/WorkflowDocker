@@ -445,7 +445,7 @@ Locks: nodo_id -> usuario_id (Para evitar conflictos en edición colaborativa).
 Eliminación en Cascada: Al finalizar un trámite (nodo "Fin"), el backend debe eliminar el registro en Solicitantes y Acceso_Temporal en PostgreSQL.
 
 Referencia Cruzada: Versiones_Workflow en SQL apunta al _id de Workflow_Definitions en MongoDB para que el sistema sepa qué versión del JSON debe cargar.
-
+ 
 Detección de Anomalías: El campo historial_ejecucion en MongoDB es la fuente para que la IA y el Dashboard calculen los retrasos y rebotes entre departamentos.
 
 
@@ -466,10 +466,47 @@ Detección de Anomalías: El campo historial_ejecucion en MongoDB es la fuente p
 
 
 
+CONECTARSE A AMAZON WEB SERVICE
+ssh -i "workflow-app.pem" ubuntu@3.92.84.71
+
+ACTUALIZAR UBUNTU
+sudo apt update && sudo apt upgrade -y
+
+INSTALAR DOCKER
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+DARLE PERMISO AL USUARIO
+sudo usermod -aG docker ubuntu
+
+REINICIAR SESION PARA APLICAR CAMBIOS DE PERMISO
+ssh -i "workflow-app.pem" ubuntu@3.92.84.71
+
+CLONAR REPOSITORIO
+mkdir uagrm-backend
+cd uagrm-backend
+git clone https://github.com/TU_USUARIO/TU_REPOSITORIO.git .
+
+RECREAR EL .env_docker y pegras las variables de entorno
+nano .env_docker
+
+ENVIAR ARCHIVOS AL SERVIDOR
+scp -i "workflow-app.pem" ./backend-sprint/src/main/resources/workflow-app-firebase-key.json ubuntu@3.92.84.71:~/workflow-backend/backend-sprint/src/main/resources/workflow-app-firebase-key.json
+
+CREAR LAS IMAGENES
+docker compose up -d --build
+
+EJECUTAR IAMGENES
+docker compose down -- ELIMINAR IMAGENES
+docker compose up -d
+
+PERMISOS PARA SPRING BOOT SI DA ERROR
+chmod +x backend-sprint/mvnw
 
 
 
-
+FASTAPI API: http://3.92.84.71:8000
+SPRING BOOT : http://3.92.84.71:8080
 
 
 
