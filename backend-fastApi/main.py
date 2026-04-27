@@ -27,6 +27,8 @@ app = FastAPI(
 origins = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
+    "http://workflow-puma.s3-website-us-east-1.amazonaws.com",
+    "https://d2oa5maju2bq22.cloudfront.net"
 ]
 
 app.add_middleware(
