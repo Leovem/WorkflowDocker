@@ -16,7 +16,7 @@ export interface ChatMessage1 {
 })
 export class CopilotService {
   // URL de tu servidor FastAPI (ia.py)
-  private readonly API_URL = `${environment.iaApiUrl}/api/copilot/ask`;
+  private readonly API_URL = `${environment.iaApiUrl}/copilot/ask`;
 
   constructor(private http: HttpClient) {}
 

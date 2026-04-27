@@ -43,7 +43,7 @@ app.add_middleware(
 app.include_router(ia_router, prefix="/api", tags=["ia"])
 
 # CONFIGURACION DE WEBSOCKETS
-@app.websocket("/ws/design/{politica_id}/{user_name}")
+@app.websocket("api/ws/design/{politica_id}/{user_name}")
 async def websocket_endpoint(websocket: WebSocket, politica_id: str, user_name: str):
     print(f"DEBUG: Intentando conectar {user_name} a Redis...")
     user_id = str(id(websocket))  # Generamos un ID único para el socket (puede ser cualquier cosa única)
