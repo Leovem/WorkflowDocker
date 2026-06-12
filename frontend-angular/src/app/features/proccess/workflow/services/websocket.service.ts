@@ -14,8 +14,11 @@ export class WebSocketService {
       return;
     }
 
-    const wsBaseUrl = environment.iaApiUrl.replace(/^http/, 'ws');
-    const wsUrl = `${wsBaseUrl}/ws/design/${policyId}/${encodeURIComponent(user)}`;
+    const wsUrl = this.buildIaWebSocketUrl(
+      `/ws/design/${policyId}/${encodeURIComponent(user)}`
+    );
+
+    console.log('[WS] Intentando conectar a:', wsUrl);
 
     this.socket = new WebSocket(wsUrl);
 
@@ -39,14 +42,14 @@ export class WebSocketService {
     };
 
     this.socket.onclose = (event) => {
-  console.log('[WS] Desconectado', {
-    code: event.code,
-    reason: event.reason,
-    wasClean: event.wasClean,
-  });
+      console.log('[WS] Desconectado', {
+        code: event.code,
+        reason: event.reason,
+        wasClean: event.wasClean,
+      });
 
-  this.socket = null;
-};
+      this.socket = null;
+    };
 
     this.socket.onerror = (error) => {
       console.error('[WS Error]', error);
@@ -71,5 +74,19 @@ export class WebSocketService {
     }
 
     console.warn('[WS] Intento de envío pero no hay conexión abierta.', data);
+  }
+
+  private buildIaWebSocketUrl(path: string): string {
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+    if (environment.iaApiUrl.startsWith('http://')) {
+      return `${environment.iaApiUrl.replace('http://', 'ws://')}${path}`;
+    }
+
+    if (environment.iaApiUrl.startsWith('https://')) {
+      return `${environment.iaApiUrl.replace('https://', 'wss://')}${path}`;
+    }
+
+    return `${wsProtocol}://${window.location.host}${environment.iaApiUrl}${path}`;
   }
 }

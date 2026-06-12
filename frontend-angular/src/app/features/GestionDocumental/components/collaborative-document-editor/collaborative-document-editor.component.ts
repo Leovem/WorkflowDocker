@@ -18,6 +18,7 @@ import { WebsocketProvider } from 'y-websocket';
 import { NgxTiptapModule } from 'ngx-tiptap';
 
 import { CollaborativeDocumentApiService } from '../../services/collaborative-document-api.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-collaborative-document-editor',
@@ -99,61 +100,61 @@ export class CollaborativeDocumentEditorComponent implements OnInit, OnDestroy {
   }
 
   private initializeCollaborativeEditor(): void {
-    const finalRoomName = this.roomName || `workflow-doc-${this.documentId}`;
+  const finalRoomName = this.roomName || `workflow-doc-${this.documentId}`;
 
-    this.ydoc = new Y.Doc();
+  this.ydoc = new Y.Doc();
 
-    this.provider = new WebsocketProvider(
-      'ws://localhost:1234',
-      finalRoomName,
-      this.ydoc
-    );
+  this.provider = new WebsocketProvider(
+    environment.collabWsUrl,
+    finalRoomName,
+    this.ydoc
+  );
 
-    this.provider.on('status', (event: any) => {
-      this.isConnected.set(event.status === 'connected');
-    });
+  this.provider.on('status', (event: any) => {
+    this.isConnected.set(event.status === 'connected');
+  });
 
-    this.provider.awareness.setLocalStateField('user', {
-      id: this.userId,
-      name: this.userName,
-      color: this.userColor,
-    });
+  this.provider.awareness.setLocalStateField('user', {
+    id: this.userId,
+    name: this.userName,
+    color: this.userColor,
+  });
 
-    this.provider.awareness.on('change', () => {
-      const users = Array.from(this.provider!.awareness.getStates().values())
-        .map((state: any) => state.user)
-        .filter(Boolean);
+  this.provider.awareness.on('change', () => {
+    const users = Array.from(this.provider!.awareness.getStates().values())
+      .map((state: any) => state.user)
+      .filter(Boolean);
 
-      this.activeUsers.set(users);
-    });
+    this.activeUsers.set(users);
+  });
 
-    this.editor = new Editor({
-      extensions: [
-        StarterKit.configure({
-          history: false,
-        }),
-        Collaboration.configure({
-          document: this.ydoc,
-        }),
-        CollaborationCursor.configure({
-          provider: this.provider,
-          user: {
-            name: this.userName,
-            color: this.userColor,
-          },
-        }),
-      ],
-      content: '',
-      editorProps: {
-        attributes: {
-          class:
-            'min-h-[650px] rounded-xl bg-white px-16 py-12 text-slate-900 outline-none shadow-xl prose prose-slate max-w-none',
+  this.editor = new Editor({
+    extensions: [
+      StarterKit.configure({
+        history: false,
+      }),
+      Collaboration.configure({
+        document: this.ydoc,
+      }),
+      CollaborationCursor.configure({
+        provider: this.provider,
+        user: {
+          name: this.userName,
+          color: this.userColor,
         },
+      }),
+    ],
+    content: '',
+    editorProps: {
+      attributes: {
+        class:
+          'min-h-[650px] rounded-xl bg-white px-16 py-12 text-slate-900 outline-none shadow-xl prose prose-slate max-w-none',
       },
-    });
+    },
+  });
 
-    this.loadInitialContentSafely();
-  }
+  this.loadInitialContentSafely();
+}
 
   private loadInitialContentSafely(): void {
     if (!this.provider || !this.editor) {
