@@ -1,0 +1,331 @@
+<div class="min-h-screen bg-[#06101d] p-8 font-sans text-white">
+  <div class="mx-auto max-w-7xl">
+
+    <header class="mb-8 flex items-end justify-between">
+      <div>
+        <h1 class="text-3xl font-black tracking-tight text-cyan-300">
+          Centro de Comando Analítico
+        </h1>
+
+        <p class="mt-1 text-neutral-400">
+          Rendimiento en tiempo real de los flujos BPMN
+        </p>
+      </div>
+    </header>
+
+    <!-- GRÁFICOS PRINCIPALES -->
+    <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+      <div class="rounded-xl border border-cyan-950/70 bg-[#08111f] p-6 shadow-lg shadow-cyan-950/10">
+        <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400">
+          Top Rendimiento (Funcionarios)
+        </h3>
+
+        <apx-chart
+          *ngIf="chartFuncionarios.series[0].data.length > 0"
+          [series]="chartFuncionarios.series"
+          [chart]="chartFuncionarios.chart"
+          [xaxis]="chartFuncionarios.xaxis"
+          [plotOptions]="chartFuncionarios.plotOptions"
+          [dataLabels]="chartFuncionarios.dataLabels"
+          [colors]="chartFuncionarios.colors"
+          [theme]="chartFuncionarios.theme"
+        >
+        </apx-chart>
+
+        <div
+          *ngIf="chartFuncionarios.series[0].data.length === 0"
+          class="flex h-[300px] items-center justify-center text-slate-600"
+        >
+          Aún no hay datos de tareas completadas.
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-cyan-950/70 bg-[#08111f] p-6 shadow-lg shadow-cyan-950/10">
+        <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400">
+          Carga de Trabajo por Trámite
+        </h3>
+
+        <apx-chart
+          *ngIf="chartPoliticas.series.length > 0"
+          [series]="chartPoliticas.series"
+          [chart]="chartPoliticas.chart"
+          [labels]="chartPoliticas.labels"
+          [stroke]="chartPoliticas.stroke"
+          [colors]="chartPoliticas.colors"
+          [theme]="chartPoliticas.theme"
+        >
+        </apx-chart>
+
+        <div
+          *ngIf="chartPoliticas.series.length === 0"
+          class="flex h-[300px] items-center justify-center text-slate-600"
+        >
+          Aún no hay trámites registrados.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AUDITORÍA IA JARVIS -->
+    <div
+      class="relative overflow-hidden rounded-xl border border-cyan-400/25 bg-[#08111f] p-6 shadow-[0_0_24px_rgba(34,211,238,0.06)]"
+    >
+      <div class="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500"></div>
+
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-300">
+          <span
+            class="block h-2 w-2 rounded-full bg-cyan-400"
+            [class.animate-pulse]="isScanning"
+          >
+          </span>
+
+          Auditoría IA Predictiva (Jarvis)
+        </h3>
+
+        <button
+          type="button"
+          (click)="runJarvisAudit()"
+          [disabled]="isScanning"
+          class="flex items-center gap-2 rounded-lg border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 text-xs text-cyan-300 transition-all duration-300 hover:bg-cyan-400/20 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <span *ngIf="!isScanning">
+            Escanear Historial
+          </span>
+
+          <span *ngIf="isScanning">
+            Analizando tensores...
+          </span>
+        </button>
+      </div>
+
+      <div
+        *ngIf="isScanning"
+        class="mt-4 flex items-center gap-3 text-sm italic text-cyan-300"
+      >
+        <div class="loader"></div>
+
+        <span>
+          Jarvis está procesando los tensores de rendimiento...
+        </span>
+      </div>
+
+      <div
+        *ngIf="jarvisData"
+        class="mt-6 space-y-6 animate-fade-in"
+      >
+
+        <div class="border-l-4 border-cyan-400 bg-cyan-400/10 p-4">
+          <p class="text-xs font-black uppercase text-cyan-300">
+            Estado del Sistema
+          </p>
+
+          <p class="text-sm italic text-neutral-200">
+            "{{ jarvisData.analisis_rendimiento?.estado_sistema }}"
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+          <div class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+            <h4 class="mb-2 text-xs font-bold uppercase text-red-400">
+              Cuello de Botella
+            </h4>
+
+            <p class="text-sm text-neutral-300">
+              {{ jarvisData.analisis_rendimiento?.cuello_de_botella }}
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-blue-400/30 bg-blue-400/10 p-4">
+            <h4 class="mb-2 text-xs font-bold uppercase text-blue-300">
+              Reconocimiento
+            </h4>
+
+            <p class="text-sm text-neutral-300">
+              {{ jarvisData.analisis_rendimiento?.reconocimiento }}
+            </p>
+          </div>
+
+        </div>
+
+        <div class="rounded-lg border border-cyan-950/70 bg-[#0b1628] p-4">
+          <h4 class="mb-3 text-xs font-bold uppercase text-cyan-300">
+            Sugerencias
+          </h4>
+
+          <ul class="space-y-2">
+            <li
+              *ngFor="let sugerencia of jarvisData.analisis_rendimiento?.sugerencias_mejora"
+              class="text-sm text-neutral-400"
+            >
+              <span class="text-cyan-400">•</span>
+              {{ sugerencia }}
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PREDICCIÓN SIMPLE DE CUELLOS DE BOTELLA -->
+    <div
+      class="mt-8 relative overflow-hidden rounded-xl border border-orange-400/25 bg-[#08111f] p-6 shadow-[0_0_24px_rgba(251,146,60,0.06)]"
+    >
+      <div class="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-orange-400 via-red-500 to-violet-500"></div>
+
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h3 class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-300">
+            <span
+              class="block h-2 w-2 rounded-full bg-orange-400"
+              [class.animate-pulse]="isLoadingBottlenecks"
+            >
+            </span>
+
+            Predicción simple de cuellos de botella
+          </h3>
+
+          <p class="mt-1 text-sm text-neutral-400">
+            Análisis basado en duración promedio, duración máxima y volumen de tareas.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="loadBottlenecks()"
+          [disabled]="isLoadingBottlenecks"
+          class="flex items-center gap-2 rounded-lg border border-orange-400/40 bg-orange-400/10 px-4 py-2 text-xs text-orange-300 transition-all duration-300 hover:bg-orange-400/20 hover:text-orange-200 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <span *ngIf="!isLoadingBottlenecks">
+            Actualizar análisis
+          </span>
+
+          <span *ngIf="isLoadingBottlenecks">
+            Analizando...
+          </span>
+        </button>
+      </div>
+
+      <div
+        *ngIf="isLoadingBottlenecks"
+        class="py-6 text-center text-sm text-orange-300"
+      >
+        Calculando posibles cuellos de botella...
+      </div>
+
+      <div
+        *ngIf="!isLoadingBottlenecks && bottleneckAnalysis"
+        class="space-y-5"
+      >
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div class="rounded-lg border border-cyan-950/70 bg-[#0b1628] p-4">
+            <p class="text-xs font-bold uppercase text-slate-500">
+              Estado general
+            </p>
+
+            <p class="mt-2 text-xl font-black text-white">
+              {{ getBottleneckStatusLabel(bottleneckAnalysis.generalStatus) }}
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-cyan-950/70 bg-[#0b1628] p-4">
+            <p class="text-xs font-bold uppercase text-slate-500">
+              Tareas analizadas
+            </p>
+
+            <p class="mt-2 text-xl font-black text-white">
+              {{ bottleneckAnalysis.totalTasksAnalyzed }}
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-cyan-950/70 bg-[#0b1628] p-4">
+            <p class="text-xs font-bold uppercase text-slate-500">
+              Promedio minutos
+            </p>
+
+            <p class="mt-2 text-xl font-black text-white">
+              {{ bottleneckAnalysis.averageDurationMinutes }}
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-cyan-950/70 bg-[#0b1628] p-4">
+            <p class="text-xs font-bold uppercase text-slate-500">
+              Riesgos detectados
+            </p>
+
+            <p class="mt-2 text-xl font-black text-white">
+              {{ bottleneckAnalysis.totalBottlenecks }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          *ngIf="bottleneckAnalysis.bottlenecks.length === 0"
+          class="rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm text-emerald-300"
+        >
+          No se detectaron cuellos de botella relevantes.
+        </div>
+
+        <div class="grid gap-4">
+          <article
+            *ngFor="let item of bottleneckAnalysis.bottlenecks"
+            class="rounded-lg border border-orange-500/30 bg-orange-500/10 p-4"
+          >
+            <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h4 class="font-bold text-orange-200">
+                  {{ item.nodeName || 'Actividad sin nombre' }}
+                </h4>
+
+                <p class="text-xs text-neutral-400">
+                  Política: {{ item.policyName || 'Sin política' }}
+                </p>
+              </div>
+
+              <span class="rounded-full border border-orange-400/40 px-2 py-1 text-xs text-orange-300">
+                {{ getSeverityLabel(item.severity) }}
+              </span>
+            </div>
+
+            <p class="text-sm text-neutral-300">
+              {{ item.message }}
+            </p>
+
+            <div class="mt-4 grid grid-cols-1 gap-3 text-xs text-neutral-400 md:grid-cols-3">
+              <p>
+                <span class="font-bold text-neutral-200">Tareas:</span>
+                {{ item.taskCount }}
+              </p>
+
+              <p>
+                <span class="font-bold text-neutral-200">Promedio:</span>
+                {{ item.averageDurationMinutes }} min
+              </p>
+
+              <p>
+                <span class="font-bold text-neutral-200">Máximo:</span>
+                {{ item.maxDurationMinutes }} min
+              </p>
+            </div>
+
+            <div class="mt-4 rounded-lg border border-orange-400/20 bg-[#06101d] p-3">
+              <p class="text-xs font-bold uppercase text-orange-300">
+                Recomendación
+              </p>
+
+              <p class="mt-1 text-sm text-neutral-300">
+                {{ item.recommendation }}
+              </p>
+            </div>
+          </article>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

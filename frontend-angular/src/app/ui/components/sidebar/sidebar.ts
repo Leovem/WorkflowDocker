@@ -1,7 +1,18 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, Home, Package, Building2, Users, BarChart3, LogOut, Shield, GitBranch } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Home,
+  Package,
+  Building2,
+  Users,
+  BarChart3,
+  LogOut,
+  Shield,
+  GitBranch,
+} from 'lucide-angular';
+
 import { Auth } from '../../../core/services/auth';
 
 @Component({
@@ -11,19 +22,12 @@ import { Auth } from '../../../core/services/auth';
   templateUrl: './sidebar.html',
 })
 export class SidebarComponent {
-  // Estados reactivos
   isCollapsed = signal(false);
   isOpen = signal(false);
 
   role = '';
   isAdmin = false;
   userName = '';
-
-  constructor(private authService: Auth) {
-    this.userName = localStorage.getItem('user') || '';
-    this.role = localStorage.getItem('role') || '';
-    this.isAdmin = this.authService.hasAdminAccess();
-  }
 
   readonly HomeIcon = Home;
   readonly AssetsIcon = Package;
@@ -34,59 +38,116 @@ export class SidebarComponent {
   readonly WorkflowIcon = GitBranch;
   readonly LogoutIcon = LogOut;
 
+  constructor(private readonly authService: Auth) {
+    this.userName =
+      localStorage.getItem('user') ||
+      localStorage.getItem('name') ||
+      localStorage.getItem('userName') ||
+      '';
+
+    this.role = localStorage.getItem('role') || '';
+    this.isAdmin = this.authService.hasAdminAccess();
+  }
+
   menuGroups = [
     {
       title: 'Menú',
       items: [
-        { label: 'Inicio', path: '/home', icon: this.HomeIcon }
+        {
+          label: 'Inicio',
+          path: '/home',
+          icon: this.HomeIcon,
+        },
       ],
-      allowedRoles: ['ROOT', 'ADMINISTRADOR', 'FUNCIONARIO', 'RECEPCIONISTA']
+      allowedRoles: ['ROOT', 'ADMIN', 'ADMINISTRADOR', 'FUNCIONARIO', 'RECEPCIONISTA'],
     },
     {
       title: 'Administración',
       items: [
-        { label: 'Usuarios', path: '/usuarios', icon: this.UsersIcon },
-        { label: 'Roles', path: '/roles', icon: this.RolesIcon },
-        { label: 'Departamentos', path: '/departamentos', icon: this.DeptosIcon },
-        { label: 'Workflow', path: '/workflow', icon: this.WorkflowIcon },
-        { label: 'dashboard', path: '/dashboard', icon: this.AssetsIcon}
+        {
+          label: 'Usuarios',
+          path: '/usuarios',
+          icon: this.UsersIcon,
+        },
+        {
+          label: 'Roles',
+          path: '/roles',
+          icon: this.RolesIcon,
+        },
+        {
+          label: 'Departamentos',
+          path: '/departamentos',
+          icon: this.DeptosIcon,
+        },
+        {
+          label: 'Workflow',
+          path: '/workflow',
+          icon: this.WorkflowIcon,
+        },
+        {
+          label: 'Dashboard',
+          path: '/dashboard',
+          icon: this.AssetsIcon,
+        },
+        {
+          label: 'Reportes documentales',
+          path: '/reportes/documentos',
+          icon: this.ReportsIcon,
+        },
+        {
+          label: 'Reportes dinámicos IA',
+          path: '/reportes-dinamicos-ia',
+          icon: this.ReportsIcon,
+        },
       ],
-      allowedRoles: ['ROOT', 'ADMINISTRADOR']
+      allowedRoles: ['ROOT', 'ADMIN', 'ADMINISTRADOR'],
     },
-    // Plantillas vacías para los otros roles, se llenarán luego
     {
       title: 'Funcionario',
       items: [
-        { label: 'Actividades', path: '/tareas', icon: this.WorkflowIcon }
+        {
+          label: 'Actividades',
+          path: '/tareas',
+          icon: this.WorkflowIcon,
+        },
       ],
-      allowedRoles: ['FUNCIONARIO']
+      allowedRoles: ['FUNCIONARIO'],
     },
     {
       title: 'Recepción',
       items: [
-        { label: 'Crear Trámites', path: '/tramites', icon: this.WorkflowIcon },
-        { label: 'Historial de Trámites', path: '/historial', icon: this.WorkflowIcon }
+        {
+          label: 'Crear Trámites',
+          path: '/tramites',
+          icon: this.WorkflowIcon,
+        },
+        {
+          label: 'Historial de Trámites',
+          path: '/historial',
+          icon: this.WorkflowIcon,
+        },
       ],
-      allowedRoles: ['RECEPCIONISTA']
-    }
+      allowedRoles: ['RECEPCIONISTA'],
+    },
   ];
 
   get visibleMenuGroups() {
     const currentRole = String(this.role).toUpperCase();
+
     return this.menuGroups
-      .filter(group => group.allowedRoles.includes(currentRole))
-      .filter(group => group.items.length > 0); // No mostrar grupos vacíos
+      .filter((group) => group.allowedRoles.includes(currentRole))
+      .filter((group) => group.items.length > 0);
   }
 
-  toggleCollapse() {
-    this.isCollapsed.update(s => !s);
+  toggleCollapse(): void {
+    this.isCollapsed.update((state) => !state);
   }
 
-  toggleMobile() {
-    this.isOpen.update(s => !s);
+  toggleMobile(): void {
+    this.isOpen.update((state) => !state);
   }
 
-  logout() {
+  logout(): void {
     localStorage.clear();
     window.location.href = '/login';
   }

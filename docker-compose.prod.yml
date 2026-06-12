@@ -1,0 +1,67 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    networks:
+      - workflow-network
+
+  backend-sprint:
+    build:
+      context: ./backend-sprint
+      dockerfile: Dockerfile
+    container_name: backend-sprint
+    restart: always
+    env_file:
+      - .env.prod
+    ports:
+      - "8080:8080"
+    networks:
+      - workflow-network
+
+  backend-fastapi:
+    build:
+      context: ./backend-fastApi
+      dockerfile: Dockerfile
+    container_name: backend-fastapi
+    restart: always
+    env_file:
+      - .env.prod
+    depends_on:
+      - redis
+    ports:
+      - "8000:8000"
+    networks:
+      - workflow-network
+
+  collab-doc-server:
+    build:
+      context: ./collab-doc-server
+      dockerfile: Dockerfile
+    container_name: collab-doc-server
+    restart: always
+    env_file:
+      - .env.prod
+    ports:
+      - "1234:1234"
+    networks:
+      - workflow-network
+
+  frontend-angular:
+    build:
+      context: ./frontend-angular
+      dockerfile: Dockerfile
+    container_name: frontend-angular
+    restart: always
+    depends_on:
+      - backend-sprint
+      - backend-fastapi
+      - collab-doc-server
+    ports:
+      - "80:80"
+    networks:
+      - workflow-network
+
+networks:
+  workflow-network:
+    driver: bridge

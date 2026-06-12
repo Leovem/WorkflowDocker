@@ -1,0 +1,329 @@
+<section class="space-y-6 p-4 md:p-6">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900">
+        Reportes documentales
+      </h1>
+
+      <p class="text-sm text-slate-500">
+        Dashboard, reportes detallados y exportación Excel de documentos oficiales subidos.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="isLoadingSummary || isLoadingGeneral || isLoadingDetailed"
+        (click)="loadSummary(); loadGeneralReport(); loadDetailedReport()"
+      >
+        Actualizar todo
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="isLoadingDetailed"
+        (click)="downloadExcel()"
+      >
+        Exportar Excel
+      </button>
+    </div>
+  </div>
+
+
+  <div
+    *ngIf="errorMessage"
+    class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div
+    *ngIf="isLoadingSummary"
+    class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500 shadow-sm"
+  >
+    Cargando resumen documental...
+  </div>
+
+  <app-document-report-summary
+    *ngIf="summary"
+    [summary]="summary"
+  ></app-document-report-summary>
+
+  <div
+    *ngIf="isLoadingGeneral"
+    class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500 shadow-sm"
+  >
+    Cargando reporte general...
+  </div>
+
+  <div
+    *ngIf="generalReport"
+    class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+  >
+    <div class="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-800">
+          {{ generalReport.title }}
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+          {{ generalReport.description }}
+        </p>
+      </div>
+
+      <span class="text-xs text-slate-400">
+        Generado: {{ generalReport.generatedAt | date:'short' }}
+      </span>
+    </div>
+
+    <div class="mt-4">
+      <h3 class="text-sm font-semibold text-slate-700">
+        Conclusiones automáticas
+      </h3>
+
+      <ul
+        *ngIf="generalReport.conclusions.length"
+        class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600"
+      >
+        <li *ngFor="let conclusion of generalReport.conclusions">
+          {{ conclusion }}
+        </li>
+      </ul>
+
+      <p
+        *ngIf="!generalReport.conclusions.length"
+        class="mt-2 text-sm text-slate-500"
+      >
+        No hay conclusiones disponibles.
+      </p>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="mb-4">
+      <h2 class="text-lg font-semibold text-slate-800">
+        Reporte detallado
+      </h2>
+
+      <p class="text-sm text-slate-500">
+        Filtra documentos por estado, política, trámite, cliente, nodo, departamento o requisito documental.
+      </p>
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Estado
+        </span>
+
+        <select
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          [(ngModel)]="filter.status"
+        >
+          <option value="">Todos</option>
+          <option value="PENDING">Pendientes</option>
+          <option value="APPROVED">Aprobados</option>
+          <option value="REJECTED">Rechazados</option>
+          <option value="OBSERVED">Observados</option>
+        </select>
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Política
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="ID de política"
+          [(ngModel)]="filter.policyId"
+        />
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Trámite / instancia
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="ID de instancia"
+          [(ngModel)]="filter.processInstanceId"
+        />
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Cliente
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="ID de cliente"
+          [(ngModel)]="filter.clientId"
+        />
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Nodo
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="ID de nodo"
+          [(ngModel)]="filter.nodeId"
+        />
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Departamento
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="ID de departamento"
+          [(ngModel)]="filter.departmentId"
+        />
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Documento requerido
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="Ej: Carnet de identidad"
+          [(ngModel)]="filter.requiredDocumentName"
+        />
+      </label>
+
+      <label class="grid gap-1 text-sm">
+        <span class="font-medium text-slate-700">
+          Usuario que subió
+        </span>
+
+        <input
+          type="text"
+          class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-400"
+          placeholder="ID de usuario"
+          [(ngModel)]="filter.uploadedByUserId"
+        />
+      </label>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="isLoadingDetailed"
+        (click)="applyFilters()"
+      >
+        Aplicar filtros
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="isLoadingDetailed"
+        (click)="clearFilters()"
+      >
+        Limpiar
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl border border-green-300 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="isLoadingDetailed"
+        (click)="downloadExcel()"
+      >
+        Descargar Excel filtrado
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="isLoadingDetailed"
+    class="rounded-xl border border-slate-200 bg-white py-6 text-center text-sm text-slate-500 shadow-sm"
+  >
+    Cargando reporte detallado...
+  </div>
+
+  <div *ngIf="detailedReport && !isLoadingDetailed">
+    <div class="mb-3 flex flex-col gap-1 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-800">
+            {{ detailedReport.title }}
+          </h2>
+
+          <p class="text-sm text-slate-500">
+            {{ detailedReport.description }}
+          </p>
+        </div>
+
+        <span class="text-xs text-slate-400">
+          Generado: {{ detailedReport.generatedAt | date:'short' }}
+        </span>
+      </div>
+
+      <div class="mt-3 flex flex-wrap gap-2 text-xs">
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
+          Total: {{ detailedReport.totalDocuments }}
+        </span>
+
+        <span
+          *ngIf="filter.status"
+          class="rounded-full bg-blue-50 px-3 py-1 text-blue-700"
+        >
+          Estado: {{ filter.status }}
+        </span>
+
+        <span
+          *ngIf="filter.requiredDocumentName"
+          class="rounded-full bg-purple-50 px-3 py-1 text-purple-700"
+        >
+          Requisito: {{ filter.requiredDocumentName }}
+        </span>
+
+        <span
+          *ngIf="filter.departmentId"
+          class="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700"
+        >
+          Departamento: {{ filter.departmentId | slice:0:8 }}...
+        </span>
+
+        <span
+          *ngIf="filter.nodeId"
+          class="rounded-full bg-orange-50 px-3 py-1 text-orange-700"
+        >
+          Nodo: {{ filter.nodeId | slice:0:8 }}...
+        </span>
+      </div>
+    </div>
+
+    <div
+      *ngIf="detailedReport.totalDocuments === 0"
+      class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm"
+    >
+      No se encontraron documentos con los filtros seleccionados.
+    </div>
+
+    <app-document-report-table
+      *ngIf="detailedReport.totalDocuments > 0"
+      [documents]="detailedReport.documents"
+      [currentUserId]="currentUserId"
+      [currentUserName]="currentUserName"
+    ></app-document-report-table>
+  </div>
+</section>

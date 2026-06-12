@@ -1,0 +1,159 @@
+<div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <table class="w-full min-w-[1300px] border-collapse text-left text-sm">
+    <thead>
+      <tr class="border-b border-slate-200 bg-slate-50 text-slate-500">
+        <th class="px-4 py-3 font-medium">Archivo</th>
+        <th class="px-4 py-3 font-medium">Requisito</th>
+        <th class="px-4 py-3 font-medium">Estado</th>
+        <th class="px-4 py-3 font-medium">Trámite</th>
+        <th class="px-4 py-3 font-medium">Cliente</th>
+        <th class="px-4 py-3 font-medium">Nodo</th>
+        <th class="px-4 py-3 font-medium">Departamento</th>
+        <th class="px-4 py-3 font-medium">Tipo</th>
+        <th class="px-4 py-3 font-medium">Tamaño</th>
+        <th class="px-4 py-3 font-medium">Versión</th>
+        <th class="px-4 py-3 font-medium">Subido por</th>
+        <th class="px-4 py-3 font-medium">Revisado por</th>
+        <th class="px-4 py-3 font-medium">Fecha subida</th>
+        <th class="px-4 py-3 font-medium">Fecha revisión</th>
+        <th class="px-4 py-3 font-medium text-right">Acción</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        *ngFor="let document of documents"
+        class="border-b border-slate-100 hover:bg-slate-50"
+      >
+        <td class="px-4 py-3 font-medium text-slate-800">
+          <div class="max-w-xs">
+            <p class="truncate" [title]="document.originalFileName">
+              {{ document.originalFileName || 'Sin nombre' }}
+            </p>
+
+            <p class="mt-1 text-xs font-normal text-slate-400">
+              ID: {{ getShortId(document.id) }}
+            </p>
+
+            <p
+              *ngIf="hasObservation(document)"
+              class="mt-1 max-w-xs rounded-lg bg-orange-50 px-2 py-1 text-xs font-normal text-orange-700"
+            >
+              Obs: {{ document.observation }}
+            </p>
+          </div>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <span class="inline-flex max-w-[180px] truncate rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">
+            {{ getRequiredDocumentName(document) }}
+          </span>
+        </td>
+
+        <td class="px-4 py-3">
+          <span
+            class="inline-flex rounded-full border px-2 py-1 text-xs font-medium"
+            [ngClass]="getStatusClass(document.documentStatus)"
+          >
+            {{ getStatusLabel(document.documentStatus) }}
+          </span>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <span [title]="document.processInstanceId">
+            {{ getShortId(document.processInstanceId) }}
+          </span>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <span [title]="document.clientId">
+            {{ getShortId(document.clientId) }}
+          </span>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <span [title]="document.nodeId">
+            {{ getShortId(document.nodeId) }}
+          </span>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <span [title]="document.departmentId">
+            {{ getShortId(document.departmentId) }}
+          </span>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          {{ getContentTypeLabel(document.contentType) }}
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          {{ formatSize(document.size) }}
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          v{{ document.version || 1 }}
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <div class="max-w-[160px]">
+            <p class="truncate" [title]="getUploaderName(document)">
+              {{ getUploaderName(document) }}
+            </p>
+
+            <p class="text-xs text-slate-400" [title]="document.uploadedByUserId">
+              {{ getShortId(document.uploadedByUserId) }}
+            </p>
+          </div>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <div class="max-w-[160px]">
+            <p class="truncate" [title]="getReviewerName(document)">
+              {{ getReviewerName(document) }}
+            </p>
+
+            <p
+              *ngIf="document.reviewedByUserId"
+              class="text-xs text-slate-400"
+              [title]="document.reviewedByUserId"
+            >
+              {{ getShortId(document.reviewedByUserId) }}
+            </p>
+          </div>
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          {{ document.createdAt | date:'short' }}
+        </td>
+
+        <td class="px-4 py-3 text-slate-600">
+          <span *ngIf="document.reviewedAt; else noReviewedDate">
+            {{ document.reviewedAt | date:'short' }}
+          </span>
+
+          <ng-template #noReviewedDate>
+            <span class="text-slate-400">—</span>
+          </ng-template>
+        </td>
+
+        <td class="px-4 py-3 text-right">
+          <button
+            type="button"
+            class="rounded-lg border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="!document.storedFileName"
+            (click)="downloadDocument(document)"
+          >
+            Descargar
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="documents.length === 0">
+        <td colspan="15" class="px-4 py-8 text-center text-sm text-slate-500">
+          No hay documentos para los filtros seleccionados.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

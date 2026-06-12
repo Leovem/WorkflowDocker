@@ -1,126 +1,234 @@
-<div class="max-w-6xl mx-auto space-y-6">
-  <div class="flex justify-between items-center bg-[#141414] p-6 rounded-xl border border-slate-800 shadow-md">
+<div class="mx-auto max-w-6xl space-y-6">
+
+  <div
+    class="flex flex-col gap-4 rounded-xl border border-cyan-950/70 bg-[#08111f] p-6 shadow-md shadow-cyan-950/10 sm:flex-row sm:items-center sm:justify-between"
+  >
     <div>
-      <h2 class="text-2xl font-bold text-white tracking-tight">Directorio de Usuarios</h2>
-      <p class="text-slate-400 text-sm mt-1">Administra accesos y personal</p>
+      <h2 class="text-2xl font-bold tracking-tight text-white">
+        Directorio de Usuarios
+      </h2>
+
+      <p class="mt-1 text-sm text-slate-400">
+        Administra accesos y personal
+      </p>
     </div>
-    <button (click)="openCreateForm()"
-      class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-lg shadow-emerald-900/20 active:scale-95">
+
+    <button
+      type="button"
+      (click)="openCreateForm()"
+      class="inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 font-medium text-cyan-300 shadow-lg shadow-cyan-950/20 transition-all duration-300 hover:bg-cyan-400 hover:text-slate-950 active:scale-95"
+    >
       <lucide-icon [name]="PlusIcon" [size]="18"></lucide-icon>
       Nuevo Usuario
     </button>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
     <div [class]="showForm ? 'lg:col-span-2' : 'lg:col-span-3'">
-      <div class="bg-[#141414] rounded-xl border border-slate-800 shadow-md overflow-hidden">
+      <div class="overflow-hidden rounded-xl border border-cyan-950/70 bg-[#08111f] shadow-md shadow-cyan-950/10">
+
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm whitespace-nowrap">
+          <table class="w-full whitespace-nowrap text-left text-sm">
+
             <thead>
-              <tr class="bg-slate-900/50 text-slate-300 font-semibold tracking-wide border-b border-slate-800">
-                <th scope="col" class="px-6 py-4">Usuario</th>
-                <th scope="col" class="px-6 py-4">Rol & Área</th>
-                <th scope="col" class="px-6 py-4">Estado</th>
-                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
+              <tr class="border-b border-cyan-950/70 bg-[#0b1628] font-semibold tracking-wide text-slate-300">
+                <th scope="col" class="px-6 py-4">
+                  Usuario
+                </th>
+
+                <th scope="col" class="px-6 py-4">
+                  Rol & Área
+                </th>
+
+                <th scope="col" class="px-6 py-4">
+                  Estado
+                </th>
+
+                <th scope="col" class="px-6 py-4 text-right">
+                  Acciones
+                </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800 text-slate-400">
+
+            <tbody class="divide-y divide-cyan-950/50 text-slate-400">
               @for (user of users; track user.id) {
-              <tr class="hover:bg-slate-800/30 transition-colors">
-                <td class="px-6 py-4">
-                  <p class="font-medium text-white">{{ user.name }}</p>
-                  <p class="text-xs text-slate-500 mt-0.5">{{ user.email }}</p>
-                </td>
-                <td class="px-6 py-4">
-                  <p class="font-medium text-emerald-400">{{ user.role?.name || 'N/A' }}</p>
-                  <p class="text-xs text-slate-500 mt-0.5">{{ user.departamento?.name || 'S/D' }}</p>
-                </td>
-                <td class="px-6 py-4">
-                  @if (user.active || user.isActive) {
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Activo</span>
-                  } @else {
-                  <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Inactivo</span>
-                  }
-                </td>
-                <td class="px-6 py-4 text-right flex justify-end gap-3 items-center pt-6">
-                  <button (click)="openEditForm(user)" class="text-slate-400 hover:text-emerald-400 transition-colors"
-                    title="Editar">
-                    <lucide-icon [name]="PencilIcon" [size]="18"></lucide-icon>
-                  </button>
-                  @if (user.active || user.isActive) {
-                  <button (click)="deleteUser(user.id!)" class="text-slate-400 hover:text-red-400 transition-colors"
-                    title="Inhabilitar">
-                    <lucide-icon [name]="TrashIcon" [size]="18"></lucide-icon>
-                  </button>
-                  }
-                </td>
-              </tr>
+                <tr class="transition-colors duration-200 hover:bg-cyan-400/5">
+
+                  <td class="px-6 py-4">
+                    <p class="font-medium text-white">
+                      {{ user.name }}
+                    </p>
+
+                    <p class="mt-0.5 text-xs text-slate-500">
+                      {{ user.email }}
+                    </p>
+                  </td>
+
+                  <td class="px-6 py-4">
+                    <p class="font-medium text-cyan-300">
+                      {{ user.role?.name || 'N/A' }}
+                    </p>
+
+                    <p class="mt-0.5 text-xs text-slate-500">
+                      {{ user.departamento?.name || 'S/D' }}
+                    </p>
+                  </td>
+
+                  <td class="px-6 py-4">
+                    @if (user.active || user.isActive) {
+                      <span
+                        class="inline-flex items-center rounded border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-xs font-medium text-cyan-300"
+                      >
+                        Activo
+                      </span>
+                    } @else {
+                      <span
+                        class="inline-flex items-center rounded border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400"
+                      >
+                        Inactivo
+                      </span>
+                    }
+                  </td>
+
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        (click)="openEditForm(user)"
+                        class="text-slate-400 transition-colors hover:text-cyan-300"
+                        title="Editar"
+                        aria-label="Editar usuario"
+                      >
+                        <lucide-icon [name]="PencilIcon" [size]="18"></lucide-icon>
+                      </button>
+
+                      @if (user.active || user.isActive) {
+                        <button
+                          type="button"
+                          (click)="deleteUser(user.id!)"
+                          class="text-slate-400 transition-colors hover:text-red-400"
+                          title="Inhabilitar"
+                          aria-label="Inhabilitar usuario"
+                        >
+                          <lucide-icon [name]="TrashIcon" [size]="18"></lucide-icon>
+                        </button>
+                      }
+                    </div>
+                  </td>
+
+                </tr>
               } @empty {
-              <tr>
-                <td colspan="4" class="px-6 py-12 text-center text-slate-500">
-                  <p class="mb-2">No hay usuarios registrados.</p>
-                </td>
-              </tr>
+                <tr>
+                  <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                    <p class="mb-2">
+                      No hay usuarios registrados.
+                    </p>
+                  </td>
+                </tr>
               }
             </tbody>
+
           </table>
         </div>
+
       </div>
     </div>
 
     @if (showForm) {
-    <div class="lg:col-span-1 border border-emerald-500/20 bg-emerald-950/10 rounded-xl p-6 relative shadow-lg h-fit">
-      <h3 class="text-lg font-bold text-white mb-6">{{ editingId ? 'Modificar Usuario' : 'Registrar Nuevo' }}</h3>
+      <aside
+        class="h-fit rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-6 shadow-lg shadow-cyan-950/10 lg:col-span-1"
+      >
+        <h3 class="mb-6 text-lg font-bold text-white">
+          {{ editingId ? 'Modificar Usuario' : 'Registrar Nuevo' }}
+        </h3>
 
-      <form (ngSubmit)="saveUser()" class="space-y-4">
-        <app-ui-input label="Nombre Completo" [(value)]="formUser.name" placeholder="Juan Perez">
-        </app-ui-input>
+        <form (ngSubmit)="saveUser()" class="space-y-4">
 
-        <app-ui-input label="Correo Electrónico" type="email" [(value)]="formUser.email"
-          placeholder="juan@uagrm.edu.bo">
-        </app-ui-input>
+          <app-ui-input
+            label="Nombre Completo"
+            [(value)]="formUser.name"
+            placeholder="Juan Perez"
+          >
+          </app-ui-input>
 
-        <app-ui-input label="Contraseña" type="password" [(value)]="formUser.password!"
-          [placeholder]="editingId ? 'Dejar en blanco para no modificar' : '••••••••'">
-        </app-ui-input>
+          <app-ui-input
+            label="Correo Electrónico"
+            type="email"
+            [(value)]="formUser.email"
+            placeholder="juan@uagrm.edu.bo"
+          >
+          </app-ui-input>
 
-        <div class="space-y-2 w-full">
-          <label class="text-sm font-medium leading-none text-slate-200 ml-1">Asignar Rol</label>
-          <select name="roleSelection" [(ngModel)]="formUser.roleId" class="flex h-10 w-full rounded-md border border-slate-800 bg-[#0a0a0a] px-3 py-2 text-sm 
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 
-                     transition-all text-white">
-            <option value="" disabled selected>Seleccione un Rol</option>
-            @for (role of roles; track role.id) {
-            <option [value]="role.id">{{ role.name }}</option>
-            }
-          </select>
-        </div>
+          <app-ui-input
+            label="Contraseña"
+            type="password"
+            [(value)]="formUser.password!"
+            [placeholder]="editingId ? 'Dejar en blanco para no modificar' : '••••••••'"
+          >
+          </app-ui-input>
 
-        <div class="space-y-2 w-full">
-          <label class="text-sm font-medium leading-none text-slate-200 ml-1">Asignar Departamento</label>
-          <select name="deptSelection" [(ngModel)]="formUser.departamentoId" class="flex h-10 w-full rounded-md border border-slate-800 bg-[#0a0a0a] px-3 py-2 text-sm 
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 
-                     transition-all text-white">
-            <option value="" disabled selected>Seleccione un Área</option>
-            @for (dept of departments; track dept.id) {
-            <option [value]="dept.id">{{ dept.name }}</option>
-            }
-          </select>
-        </div>
+          <div class="w-full space-y-2">
+            <label class="ml-1 text-sm font-medium leading-none text-slate-200">
+              Asignar Rol
+            </label>
 
-        <div class="pt-4 flex gap-3">
-          <button type="button" (click)="closeForm()"
-            class="w-full flex-1 px-4 py-2 border border-slate-700 hover:bg-slate-800 rounded-md text-sm font-medium transition-colors text-white">
-            Cancelar
-          </button>
-          <app-ui-button type="submit" class="flex-1 w-full">
-            {{ editingId ? 'Guardar' : 'Crear' }}
-          </app-ui-button>
-        </div>
-      </form>
-    </div>
+            <select
+              name="roleSelection"
+              [(ngModel)]="formUser.roleId"
+              class="flex h-10 w-full rounded-md border border-cyan-950/70 bg-[#06101d] px-3 py-2 text-sm text-white transition-all outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60"
+            >
+              <option value="" disabled selected>
+                Seleccione un Rol
+              </option>
+
+              @for (role of roles; track role.id) {
+                <option [value]="role.id">
+                  {{ role.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="w-full space-y-2">
+            <label class="ml-1 text-sm font-medium leading-none text-slate-200">
+              Asignar Departamento
+            </label>
+
+            <select
+              name="deptSelection"
+              [(ngModel)]="formUser.departamentoId"
+              class="flex h-10 w-full rounded-md border border-cyan-950/70 bg-[#06101d] px-3 py-2 text-sm text-white transition-all outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60"
+            >
+              <option value="" disabled selected>
+                Seleccione un Área
+              </option>
+
+              @for (dept of departments; track dept.id) {
+                <option [value]="dept.id">
+                  {{ dept.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button
+              type="button"
+              (click)="closeForm()"
+              class="w-full flex-1 rounded-md border border-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            >
+              Cancelar
+            </button>
+
+            <app-ui-button type="submit" class="w-full flex-1">
+              {{ editingId ? 'Guardar' : 'Crear' }}
+            </app-ui-button>
+          </div>
+
+        </form>
+      </aside>
     }
+
   </div>
 </div>

@@ -1,78 +1,141 @@
-<div class="max-w-6xl mx-auto space-y-6">
-  <div class="flex justify-between items-center bg-[#141414] p-6 rounded-xl border border-slate-800 shadow-md">
+<div class="mx-auto max-w-6xl space-y-6">
+
+  <div
+    class="flex flex-col gap-4 rounded-xl border border-cyan-950/70 bg-[#08111f] p-6 shadow-md shadow-cyan-950/10 sm:flex-row sm:items-center sm:justify-between"
+  >
     <div>
-      <h2 class="text-2xl font-bold text-white tracking-tight">Gestión de Roles</h2>
-      <p class="text-slate-400 text-sm mt-1">Configura credenciales y roles para el sistema (RBAC)</p>
+      <h2 class="text-2xl font-bold tracking-tight text-white">
+        Gestión de Roles
+      </h2>
+
+      <p class="mt-1 text-sm text-slate-400">
+        Configura credenciales y roles para el sistema (RBAC)
+      </p>
     </div>
-    <button (click)="openCreateForm()" 
-      class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-lg shadow-emerald-900/20 active:scale-95">
+
+    <button
+      type="button"
+      (click)="openCreateForm()"
+      class="inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 font-medium text-cyan-300 shadow-lg shadow-cyan-950/20 transition-all duration-300 hover:bg-cyan-400 hover:text-slate-950 active:scale-95"
+    >
       <lucide-icon [name]="PlusIcon" [size]="18"></lucide-icon>
       Nuevo Rol
     </button>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
     <div [class]="showForm ? 'lg:col-span-2' : 'lg:col-span-3'">
-      <div class="bg-[#141414] rounded-xl border border-slate-800 shadow-md overflow-hidden">
+      <div class="overflow-hidden rounded-xl border border-cyan-950/70 bg-[#08111f] shadow-md shadow-cyan-950/10">
+
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm whitespace-nowrap">
+          <table class="w-full whitespace-nowrap text-left text-sm">
+
             <thead>
-              <tr class="bg-slate-900/50 text-slate-300 font-semibold tracking-wide border-b border-slate-800">
-                <th scope="col" class="px-6 py-4">ID</th>
-                <th scope="col" class="px-6 py-4">Nombre del Rol</th>
-                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
+              <tr class="border-b border-cyan-950/70 bg-[#0b1628] font-semibold tracking-wide text-slate-300">
+                <th scope="col" class="px-6 py-4">
+                  ID
+                </th>
+
+                <th scope="col" class="px-6 py-4">
+                  Nombre del Rol
+                </th>
+
+                <th scope="col" class="px-6 py-4 text-right">
+                  Acciones
+                </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800 text-slate-400">
+
+            <tbody class="divide-y divide-cyan-950/50 text-slate-400">
               @for (role of roles; track role.id) {
-                <tr class="hover:bg-slate-800/30 transition-colors">
-                  <td class="px-6 py-4 font-mono text-xs text-slate-500">{{ role.id | slice:0:8 }}...</td>
-                  <td class="px-6 py-4 font-medium">{{ role.name }}</td>
-                  <td class="px-6 py-4 text-right flex justify-end gap-3">
-                    <button (click)="openEditForm(role)" class="text-slate-400 hover:text-emerald-400 transition-colors" title="Editar">
-                      <lucide-icon [name]="PencilIcon" [size]="18"></lucide-icon>
-                    </button>
-                    <!-- Bloquear eliminar si es ROOT para evitar desastres accidentalmente, o manejarlo logico -->
-                    <button (click)="deleteRole(role.id!)" class="text-slate-400 hover:text-red-400 transition-colors" title="Eliminar">
-                      <lucide-icon [name]="TrashIcon" [size]="18"></lucide-icon>
-                    </button>
+                <tr class="transition-colors duration-200 hover:bg-cyan-400/5">
+
+                  <td class="px-6 py-4 font-mono text-xs text-slate-500">
+                    {{ role.id | slice:0:8 }}...
                   </td>
+
+                  <td class="px-6 py-4 font-medium text-white">
+                    {{ role.name }}
+                  </td>
+
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        (click)="openEditForm(role)"
+                        class="text-slate-400 transition-colors hover:text-cyan-300"
+                        title="Editar"
+                        aria-label="Editar rol"
+                      >
+                        <lucide-icon [name]="PencilIcon" [size]="18"></lucide-icon>
+                      </button>
+
+                      <!-- Recomendación: bloquear eliminar roles críticos como ROOT desde la lógica del componente -->
+                      <button
+                        type="button"
+                        (click)="deleteRole(role.id!)"
+                        class="text-slate-400 transition-colors hover:text-red-400"
+                        title="Eliminar"
+                        aria-label="Eliminar rol"
+                      >
+                        <lucide-icon [name]="TrashIcon" [size]="18"></lucide-icon>
+                      </button>
+                    </div>
+                  </td>
+
                 </tr>
               } @empty {
                 <tr>
                   <td colspan="3" class="px-6 py-12 text-center text-slate-500">
-                    <p class="mb-2">No hay roles registrados en el sistema.</p>
+                    <p class="mb-2">
+                      No hay roles registrados en el sistema.
+                    </p>
                   </td>
                 </tr>
               }
             </tbody>
+
           </table>
         </div>
+
       </div>
     </div>
 
     @if (showForm) {
-      <div class="lg:col-span-1 border border-emerald-500/20 bg-emerald-950/10 rounded-xl p-6 relative shadow-lg">
-        <h3 class="text-lg font-bold text-white mb-6">{{ editingId ? 'Editar Rol' : 'Crear Rol' }}</h3>
-        
+      <aside
+        class="h-fit rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-6 shadow-lg shadow-cyan-950/10 lg:col-span-1"
+      >
+        <h3 class="mb-6 text-lg font-bold text-white">
+          {{ editingId ? 'Editar Rol' : 'Crear Rol' }}
+        </h3>
+
         <form (ngSubmit)="saveRole()" class="space-y-4">
-          <app-ui-input 
+
+          <app-ui-input
             label="Nombre del Rol"
             [(value)]="formRole.name"
-            placeholder="Ej. Root, Administrador">
+            placeholder="Ej. Root, Administrador"
+          >
           </app-ui-input>
 
-          <div class="pt-4 flex gap-3">
-            <button type="button" (click)="closeForm()"
-              class="w-full flex-1 px-4 py-2 border border-slate-700 hover:bg-slate-800 rounded-md text-sm font-medium transition-colors text-white">
+          <div class="flex gap-3 pt-4">
+            <button
+              type="button"
+              (click)="closeForm()"
+              class="w-full flex-1 rounded-md border border-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            >
               Cancelar
             </button>
-            <app-ui-button type="submit" class="flex-1 w-full">
+
+            <app-ui-button type="submit" class="w-full flex-1">
               {{ editingId ? 'Actualizar' : 'Guardar' }}
             </app-ui-button>
           </div>
+
         </form>
-      </div>
+      </aside>
     }
+
   </div>
 </div>

@@ -1,0 +1,144 @@
+<section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h3 class="text-base font-semibold text-slate-800">
+        Versiones del documento
+      </h3>
+      <p class="text-sm text-slate-500">
+        Historial de archivos subidos para este documento.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      [disabled]="isLoading"
+      (click)="loadVersions()"
+    >
+      {{ isLoading ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </div>
+
+  <div class="mb-4 rounded-xl bg-slate-50 p-4">
+    <label class="mb-2 block text-sm font-medium text-slate-700">
+      Subir nueva versión
+    </label>
+
+    <div class="grid gap-3">
+      <input
+        type="file"
+        class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+        (change)="onFileSelected($event)"
+      />
+
+      <textarea
+        class="min-h-20 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
+        placeholder="Motivo del cambio, por ejemplo: corrección de documento observado..."
+        [(ngModel)]="changeReason"
+      ></textarea>
+
+      <button
+        type="button"
+        class="w-fit rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="!selectedFile || isUploading"
+        (click)="uploadNewVersion()"
+      >
+        {{ isUploading ? 'Subiendo versión...' : 'Subir nueva versión' }}
+      </button>
+    </div>
+
+    <p *ngIf="selectedFile" class="mt-2 text-xs text-slate-500">
+      Archivo seleccionado:
+      <span class="font-medium">{{ selectedFile.name }}</span>
+    </p>
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="mb-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700"
+  >
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading" class="py-6 text-center text-sm text-slate-500">
+    Cargando versiones...
+  </div>
+
+  <div
+    *ngIf="!isLoading && versions.length === 0"
+    class="rounded-xl border border-dashed border-slate-300 p-5 text-center"
+  >
+    <p class="text-sm text-slate-500">
+      Este documento todavía no tiene versiones adicionales.
+    </p>
+  </div>
+
+  <div *ngIf="!isLoading && versions.length > 0" class="overflow-x-auto">
+    <table class="w-full border-collapse text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 text-slate-500">
+          <th class="py-2 pr-4 font-medium">Versión</th>
+          <th class="py-2 pr-4 font-medium">Archivo</th>
+          <th class="py-2 pr-4 font-medium">Tipo</th>
+          <th class="py-2 pr-4 font-medium">Tamaño</th>
+          <th class="py-2 pr-4 font-medium">Subido por</th>
+          <th class="py-2 pr-4 font-medium">Fecha</th>
+          <th class="py-2 pr-4 font-medium">Motivo</th>
+          <th class="py-2 pr-4 font-medium">Acción</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let version of versions"
+          class="border-b border-slate-100 hover:bg-slate-50"
+        >
+          <td class="py-3 pr-4 font-medium text-slate-800">
+            v{{ version.versionNumber }}
+          </td>
+
+          <td class="py-3 pr-4 text-slate-700">
+            {{ version.originalFileName }}
+          </td>
+
+          <td class="py-3 pr-4 text-slate-600">
+            {{ version.contentType || 'Sin tipo' }}
+          </td>
+
+          <td class="py-3 pr-4 text-slate-600">
+            {{ formatSize(version.size) }}
+          </td>
+
+          <td class="py-3 pr-4 text-slate-600">
+            {{ version.uploadedByUserName || 'Sin usuario' }}
+          </td>
+
+          <td class="py-3 pr-4 text-slate-600">
+            {{ version.createdAt | date: 'short' }}
+          </td>
+
+          <td class="py-3 pr-4 text-slate-600">
+            {{ version.changeReason || 'Sin motivo registrado' }}
+          </td>
+
+          <td class="py-3 pr-4">
+            <button
+              type="button"
+              class="rounded-lg border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+              (click)="downloadVersion(version)"
+            >
+              Descargar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

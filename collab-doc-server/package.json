@@ -1,0 +1,13 @@
+{
+  "name": "collab-doc-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "y-websocket": "^1.5.4"
+  }
+}

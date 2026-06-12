@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as joint from '@joint/core';
@@ -8,7 +8,7 @@ import { ApiService } from '../policy/services/api.service';
 import { Policy } from '../policy/models/policy.model';
 import { WebSocketService } from './services/websocket.service';
 import { AiCopilotComponent, ChatMessage } from '../../../ui/components/modal-ia/ia-copilot.component';
-import {CopilotService, ChatMessage1} from './services/copilot.service';
+import { CopilotService, ChatMessage1 } from './services/copilot.service';
 import { driver } from "driver.js";
 
 
@@ -61,7 +61,7 @@ export class Workflow implements OnInit {
   ];
 
   public isAiTyping: boolean = false;
-  
+
   @ViewChild('paperContainer', { static: false }) set paperContainerSetter(element: ElementRef) {
     if (element && !this.paperInitialized) {
       this.paperContainer = element;
@@ -153,12 +153,12 @@ export class Workflow implements OnInit {
 
   launchJarvisOnboarding() {
     console.log("🤖 Jarvis: Iniciando protocolo de bienvenida...");
-    this.isCopilotOpen = true; 
+    this.isCopilotOpen = true;
     this.isAiTyping = true;
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
 
     const systemPrompt = `[SYSTEM: INICIAR_ONBOARDING] El usuario ha entrado al editor. Preséntate como Jarvis, dale la bienvenida e invítalo a diseñar su flujo BPMN.`;
-    
+
     // Tomamos la foto del diagrama (que ahora estamos 100% seguros de que existe)
     const diagramSnapshot = this.getCurrentDiagramSnapshot();
 
@@ -172,7 +172,7 @@ export class Workflow implements OnInit {
         if (response.content) {
           this.speakText(response.content);
         }
-        
+
         // Si Jarvis mandó a ejecutar el tour visual (Driver.js)
         if (response.hasAction && response.actionPayload?.tour) {
           this.startVisualTour(response.actionPayload.tour);
@@ -183,13 +183,13 @@ export class Workflow implements OnInit {
         console.error("Error conectando con Jarvis en el inicio:", err);
       }
     });
-    
+
     // Marcamos como completado
     localStorage.setItem('has_seen_tour', 'true');
   }
 
 
-startVisualTour(tourType: string) {
+  startVisualTour(tourType: string) {
     this.isCopilotOpen = false;
     this.cdr.detectChanges();
 
@@ -197,65 +197,65 @@ startVisualTour(tourType: string) {
       const tourObj = driver({
         showProgress: true,
         animate: true,
-        popoverClass: 'mi-tema-oscuro', 
+        popoverClass: 'mi-tema-oscuro',
         steps: [
           // 1. HEADER: Nombre y Descripción
-          { 
-            element: '#tour-policy-info', 
-            popover: { 
-              title: 'Identificación de la Política', 
-              description: 'Aquí puedes editar el nombre y la descripción de tu diagrama en cualquier momento haciendo clic en el texto.', 
-              side: "bottom", align: 'start' 
+          {
+            element: '#tour-policy-info',
+            popover: {
+              title: 'Identificación de la Política',
+              description: 'Aquí puedes editar el nombre y la descripción de tu diagrama en cualquier momento haciendo clic en el texto.',
+              side: "bottom", align: 'start'
             }
           },
           // 2. HEADER: Requisitos
-          { 
-            element: '#tour-requirements', 
-            popover: { 
-              title: 'Requisitos Globales', 
-              description: 'Haz clic aquí para definir qué documentos o evidencias aplican de manera general para todo el trámite.', 
-              side: "bottom", align: 'center' 
+          {
+            element: '#tour-requirements',
+            popover: {
+              title: 'Requisitos Globales',
+              description: 'Haz clic aquí para definir qué documentos o evidencias aplican de manera general para todo el trámite.',
+              side: "bottom", align: 'center'
             }
           },
           // 3. SIDEBAR: Nodos
-          { 
-            element: 'app-flow-sidebar', 
-            popover: { 
-              title: 'Librería de Nodos', 
-              description: 'Desde aquí puedes arrastrar tareas, bifurcaciones y uniones hacia el lienzo oscuro.', 
-              side: "right", align: 'start' 
+          {
+            element: 'app-flow-sidebar',
+            popover: {
+              title: 'Librería de Nodos',
+              description: 'Desde aquí puedes arrastrar tareas, bifurcaciones y uniones hacia el lienzo oscuro.',
+              side: "right", align: 'start'
             }
           },
           // 4. CANVAS: Área de trabajo
-          { 
-            element: '#canvas-container', 
-            popover: { 
-              title: 'Lienzo de Diseño', 
-              description: 'Tu área de trabajo. Arrastra los nodos aquí, conéctalos, y haz doble clic sobre cualquiera para configurar sus propiedades.', 
-              side: "top", align: 'center' 
+          {
+            element: '#canvas-container',
+            popover: {
+              title: 'Lienzo de Diseño',
+              description: 'Tu área de trabajo. Arrastra los nodos aquí, conéctalos, y haz doble clic sobre cualquiera para configurar sus propiedades.',
+              side: "top", align: 'center'
             }
           },
           // 5. HEADER: Botón Guardar
-          { 
-            element: '#tour-publish', 
-            popover: { 
-              title: 'Guardado Seguro', 
-              description: 'El sistema guarda tu progreso automáticamente cada 5 segundos, aqui puedes publicar tu politica para que entre en marcha.', 
-              side: "bottom", align: 'end' 
+          {
+            element: '#tour-publish',
+            popover: {
+              title: 'Guardado Seguro',
+              description: 'El sistema guarda tu progreso automáticamente cada 5 segundos, aqui puedes publicar tu politica para que entre en marcha.',
+              side: "bottom", align: 'end'
             }
           },
           // 6. HEADER: Botón Copilot
-          { 
-            element: '#tour-copilot', 
-            popover: { 
-              title: 'Tu Copiloto IA', 
-              description: '¿Atascado? Abre a Jarvis para auditar tu diagrama, validar conexiones o pedirle que dibuje estructuras complejas por ti.', 
-              side: "bottom", align: 'end' 
+          {
+            element: '#tour-copilot',
+            popover: {
+              title: 'Tu Copiloto IA',
+              description: '¿Atascado? Abre a Jarvis para auditar tu diagrama, validar conexiones o pedirle que dibuje estructuras complejas por ti.',
+              side: "bottom", align: 'end'
             }
           }
         ]
       });
-      
+
       tourObj.drive();
     }
   }
@@ -340,7 +340,7 @@ startVisualTour(tourType: string) {
         }, 5000);
 
         this.cdr.detectChanges();
-        
+
       }
     });
   }
@@ -407,7 +407,7 @@ startVisualTour(tourType: string) {
     if (!this.selectedPolicy) return;
 
     const nuevoEstado = !this.selectedPolicy.status;
-    
+
     // Si el usuario intenta despublicar, advertimos
     if (!nuevoEstado) {
       if (!confirm('¿Estás seguro de despublicar? Esto impedirá que se inicien nuevos trámites con esta política.')) {
@@ -641,8 +641,8 @@ startVisualTour(tourType: string) {
       width: '100%',
       height: '100%',
       gridSize: 20,
-      drawGrid: { name: 'dot', args: { color: '#2d2d2d', thickness: 1 } },
-      background: { color: '#0a0a0a' },
+      drawGrid: { name: 'dot', args: { color: '#164e63', thickness: 1 } },
+      background: { color: '#06101d' },
       interactive: true,
       linkPinning: false,
 
@@ -655,10 +655,23 @@ startVisualTour(tourType: string) {
       // -- Lógica de Conexiones --
       defaultLink: () => new joint.shapes.standard.Link({
         attrs: {
-          line: { stroke: '#10b981', strokeWidth: 2, targetMarker: { type: 'path', d: 'M 10 -5 0 0 10 5 Z', fill: '#10b981', stroke: 'none' } }
+          line: {
+            stroke: '#22d3ee',
+            strokeWidth: 2,
+            targetMarker: {
+              type: 'path',
+              d: 'M 10 -5 0 0 10 5 Z',
+              fill: '#22d3ee',
+              stroke: 'none'
+            }
+          }
         },
-        router: { name: 'manhattan' },
-        connector: { name: 'rounded' }
+        router: {
+          name: 'manhattan'
+        },
+        connector: {
+          name: 'rounded'
+        }
       }),
       validateConnection: (sourceView, sourceMagnet, targetView, targetMagnet) => {
         if (sourceView === targetView) return false;
@@ -728,7 +741,7 @@ startVisualTour(tourType: string) {
             'r': 10,
             'fill': '#ef4444',
             'cursor': 'pointer',
-            'stroke': '#0a0a0a',
+            'stroke': '#06101d',
             'stroke-width': 2
           }
         }, {
@@ -775,7 +788,7 @@ startVisualTour(tourType: string) {
           }
         ]
       });
-      
+
       const toolsView = new joint.dia.ToolsView({ tools: [removeButton] });
       linkView.addTools(toolsView);
     });
@@ -980,112 +993,288 @@ startVisualTour(tourType: string) {
     this.draggedNodeInfo = null; // Limpiamos
   }
 
-  private createJointNode(x: number, y: number, info: any) {
+  private createJointNode(x: number, y: number, info: any): void {
     const { nodeType, label, isLane, dimension } = info;
     let node: joint.dia.Element;
 
-    // --- Configuraciones comunes de puertos ---
-    const inOutPorts = {
-      groups: {
-        'in': {
-          position: 'top',
-          attrs: { circle: { r: 5, magnet: 'passive', stroke: '#141414', fill: '#ef4444', strokeWidth: 2 } }
-        },
-        'out': {
-          position: 'bottom',
-          attrs: { circle: { r: 5, magnet: true, stroke: '#141414', fill: '#10b981', strokeWidth: 2 } }
-        }
-      },
-      items: [{ group: 'in', id: 'in' }, { group: 'out', id: 'out' }]
+    const theme = {
+      canvasDark: '#06101d',
+      surface: '#08111f',
+      surfaceSoft: '#0b1628',
+      surfaceMuted: '#102033',
+
+      text: '#f8fafc',
+      textMuted: '#94a3b8',
+      textSoft: '#cbd5e1',
+
+      cyan: '#22d3ee',
+      cyanSoft: '#67e8f9',
+      cyanDark: '#0891b2',
+
+      blue: '#3b82f6',
+      blueSoft: '#93c5fd',
+
+      success: '#14b8a6',
+      danger: '#ef4444',
+      warning: '#f59e0b',
+      violet: '#8b5cf6',
+
+      border: '#164e63',
+      borderSoft: '#0e7490',
+      portStroke: '#06101d',
+      white: '#ffffff'
     };
 
-    // --- FÁBRICA DE FORMAS UML ---
+    const createPort = (
+      position: 'top' | 'bottom' | 'left' | 'right',
+      options: {
+        id?: string;
+        groupName?: string;
+        magnet: boolean | 'passive';
+        fill: string;
+        stroke?: string;
+        radius?: number;
+        strokeWidth?: number;
+      }
+    ) => ({
+      position,
+      attrs: {
+        circle: {
+          r: options.radius ?? 5,
+          magnet: options.magnet,
+          fill: options.fill,
+          stroke: options.stroke ?? theme.portStroke,
+          strokeWidth: options.strokeWidth ?? 2
+        }
+      }
+    });
+
+    const inOutPorts = {
+      groups: {
+        in: createPort('top', {
+          magnet: 'passive',
+          fill: theme.surfaceSoft,
+          stroke: theme.cyanDark
+        }),
+        out: createPort('bottom', {
+          magnet: true,
+          fill: theme.cyan,
+          stroke: theme.portStroke
+        })
+      },
+      items: [
+        { group: 'in', id: 'in' },
+        { group: 'out', id: 'out' }
+      ]
+    };
+
     if (isLane || nodeType === 'lane') {
       node = new WorkflowLane();
+
       node.position(x, y);
-      node.resize(300, 600); // Tamaño inicial vertical
+      node.resize(300, 600);
       node.set('isLane', true);
-      const idRealDepto = info.deptoId || info.departmentId || info.departament;
-      node.set('departmentId', idRealDepto);
-      node.attr('label/text', label.toUpperCase());
       node.set('z', -1);
+
+      const departmentId = info.deptoId || info.departmentId || info.departament;
+      node.set('departmentId', departmentId);
+
+      node.attr('label/text', label.toUpperCase());
     }
+
     else if (nodeType === 'start') {
       node = new joint.shapes.standard.Circle();
+
       node.position(x - 20, y - 20);
+      node.resize(40, 40);
       node.set('nodeType', 'start');
-      node.resize(40, 40);
-      node.attr({
-        body: { fill: '#10b981', stroke: '#064e3b', strokeWidth: 4, magnet: true },
-        label: { text: 'INICIO', fill: '#34d399', fontSize: 9, textVerticalAnchor: 'bottom', refY: '-15', fontWeight: 'bold' }
-      });
-    }
-    else if (nodeType === 'end') {
-      node = new joint.shapes.standard.Circle();
-      node.set('nodeType', 'end');
-      node.position(x - 20, y - 20);
-      node.resize(40, 40);
-      node.attr({
-        body: { fill: '#0a0a0a', stroke: '#ef4444', strokeWidth: 6 },
-        label: { text: 'FIN', fill: '#ef4444', fontSize: 9, textVerticalAnchor: 'top', refY: 55, fontWeight: 'bold' },
-      });
-      node.set('ports', { groups: { 'in': inOutPorts.groups['in'] }, items: [{ group: 'in', id: 'in' }] });
-    }
-    // --- NODO DECISIÓN (1 Entrada, 2 Salidas: Verdadero/Falso) ---
-    else if (nodeType === 'decision' || nodeType === 'if') {
-      node = new joint.shapes.standard.Polygon();
-      node.set('nodeType', 'decision');
-      node.position(x - 30, y - 30);
-      node.resize(60, 60);
 
       node.attr({
-        body: { refPoints: '10,0 20,10 10,20 0,10', fill: '#1a1a1a', stroke: '#eab308', strokeWidth: 2 },
-        label: { text: label || 'IF', fill: '#fef08a', fontSize: 10, refY: '100%', refY2: 5 }
+        body: {
+          fill: theme.cyan,
+          stroke: theme.cyanDark,
+          strokeWidth: 4,
+          magnet: true
+        },
+        label: {
+          text: 'INICIO',
+          fill: theme.cyanSoft,
+          fontSize: 9,
+          fontWeight: 'bold',
+          textVerticalAnchor: 'bottom',
+          refY: '-15'
+        }
+      });
+    }
+
+    else if (nodeType === 'end') {
+      node = new joint.shapes.standard.Circle();
+
+      node.position(x - 20, y - 20);
+      node.resize(40, 40);
+      node.set('nodeType', 'end');
+
+      node.attr({
+        body: {
+          fill: theme.surface,
+          stroke: theme.danger,
+          strokeWidth: 5
+        },
+        label: {
+          text: 'FIN',
+          fill: theme.danger,
+          fontSize: 9,
+          fontWeight: 'bold',
+          textVerticalAnchor: 'top',
+          refY: 55
+        }
       });
 
       node.set('ports', {
         groups: {
-          // Entrada (Arriba)
-          'in': {
-            position: 'top',
-            attrs: { circle: { r: 5, magnet: 'passive', fill: '#fff', stroke: '#eab308', strokeWidth: 2 } }
-          },
-          // Salida VERDADERA (Derecha) - Magnet Activo
-          'outTrue': {
+          in: inOutPorts.groups.in
+        },
+        items: [
+          { group: 'in', id: 'in' }
+        ]
+      });
+    }
+
+    else if (nodeType === 'decision' || nodeType === 'if') {
+      node = new joint.shapes.standard.Polygon();
+
+      node.position(x - 30, y - 30);
+      node.resize(60, 60);
+      node.set('nodeType', 'decision');
+
+      node.attr({
+        body: {
+          refPoints: '10,0 20,10 10,20 0,10',
+          fill: theme.surface,
+          stroke: theme.warning,
+          strokeWidth: 2
+        },
+        label: {
+          text: label || 'IF',
+          fill: '#fde68a',
+          fontSize: 10,
+          fontWeight: 'bold',
+          refY: '100%',
+          refY2: 5
+        }
+      });
+
+      node.set('ports', {
+        groups: {
+          in: createPort('top', {
+            magnet: 'passive',
+            fill: theme.surfaceSoft,
+            stroke: theme.warning
+          }),
+
+          outTrue: {
             position: 'right',
-            attrs: { circle: { r: 5, magnet: true, fill: '#10b981', stroke: '#1a1a1a', strokeWidth: 2 } },
-            label: { position: { name: 'right' }, markup: [{ tagName: 'text', textContent: 'V', style: { fill: '#10b981', fontSize: '12px', fontWeight: 'bold' } }] }
+            attrs: {
+              circle: {
+                r: 5,
+                magnet: true,
+                fill: theme.success,
+                stroke: theme.portStroke,
+                strokeWidth: 2
+              }
+            },
+            label: {
+              position: { name: 'right' },
+              markup: [
+                {
+                  tagName: 'text',
+                  textContent: 'V',
+                  style: {
+                    fill: theme.success,
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }
+                }
+              ]
+            }
           },
-          // Salida FALSA (Abajo) - Magnet Activo
-          'outFalse': {
+
+          outFalse: {
             position: 'bottom',
-            attrs: { circle: { r: 5, magnet: true, fill: '#ef4444', stroke: '#1a1a1a', strokeWidth: 2 } },
-            label: { position: { name: 'bottom' }, markup: [{ tagName: 'text', textContent: 'F', style: { fill: '#ef4444', fontSize: '12px', fontWeight: 'bold' } }] }
+            attrs: {
+              circle: {
+                r: 5,
+                magnet: true,
+                fill: theme.danger,
+                stroke: theme.portStroke,
+                strokeWidth: 2
+              }
+            },
+            label: {
+              position: { name: 'bottom' },
+              markup: [
+                {
+                  tagName: 'text',
+                  textContent: 'F',
+                  style: {
+                    fill: theme.danger,
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }
+                }
+              ]
+            }
           }
         },
         items: [
           { group: 'in', id: 'in' },
-          { group: 'outTrue', id: 'out-true' },    // 👈 ID estricto para Verdadero
-          { group: 'outFalse', id: 'out-false' }   // 👈 ID estricto para Falso
+          { group: 'outTrue', id: 'out-true' },
+          { group: 'outFalse', id: 'out-false' }
         ]
       });
     }
-    // --- NODO FORK (División: 1 Entrada -> N Salidas) ---
+
     else if (nodeType === 'fork') {
       node = new joint.shapes.standard.Rectangle();
-      node.set('nodeType', 'fork'); // Tu constante para el panel
+
       node.position(x - 50, y - 5);
       node.resize(100, 8);
+      node.set('nodeType', 'fork');
+
       node.attr({
-        body: { fill: '#3b82f6', stroke: 'none', rx: 2, ry: 2, magnet: true }, // Azul para Fork
-        label: { text: label || 'FORK', fill: '#94a3b8', fontSize: 9, refY: -18, fontWeight: 'bold' }
+        body: {
+          fill: theme.blue,
+          stroke: theme.blueSoft,
+          strokeWidth: 1,
+          rx: 2,
+          ry: 2,
+          magnet: true
+        },
+        label: {
+          text: label || 'FORK',
+          fill: theme.textMuted,
+          fontSize: 9,
+          fontWeight: 'bold',
+          refY: -18
+        }
       });
 
-      // Puertos: 1 Entrada arriba, 3 Salidas abajo por defecto
       node.set('ports', {
         groups: {
-          'in': { position: 'top', attrs: { circle: { r: 3, magnet: 'passive', fill: '#fff' } } },
-          'out': { position: 'bottom', attrs: { circle: { r: 3, magnet: true, fill: '#3b82f6' } } }
+          in: createPort('top', {
+            magnet: 'passive',
+            fill: theme.surfaceSoft,
+            stroke: theme.blueSoft,
+            radius: 3,
+            strokeWidth: 1
+          }),
+          out: createPort('bottom', {
+            magnet: true,
+            fill: theme.blue,
+            stroke: theme.portStroke,
+            radius: 3,
+            strokeWidth: 1
+          })
         },
         items: [
           { group: 'in', id: 'f-in' },
@@ -1096,22 +1285,47 @@ startVisualTour(tourType: string) {
       });
     }
 
-    // --- NODO JOIN (Unión: N Entradas -> 1 Salida) ---
     else if (nodeType === 'join') {
       node = new joint.shapes.standard.Rectangle();
-      node.set('nodeType', 'join'); // Tu constante para el panel
+
       node.position(x - 50, y - 5);
       node.resize(100, 8);
+      node.set('nodeType', 'join');
+
       node.attr({
-        body: { fill: '#f59e0b', stroke: 'none', rx: 2, ry: 2, magnet: true }, // Ámbar para Join
-        label: { text: label || 'JOIN', fill: '#94a3b8', fontSize: 9, refY: -18, fontWeight: 'bold' }
+        body: {
+          fill: theme.cyanDark,
+          stroke: theme.cyanSoft,
+          strokeWidth: 1,
+          rx: 2,
+          ry: 2,
+          magnet: true
+        },
+        label: {
+          text: label || 'JOIN',
+          fill: theme.textMuted,
+          fontSize: 9,
+          fontWeight: 'bold',
+          refY: -18
+        }
       });
 
-      // Puertos: 3 Entradas arriba, 1 Salida abajo
       node.set('ports', {
         groups: {
-          'in': { position: 'top', attrs: { circle: { r: 3, magnet: 'passive', fill: '#fff' } } },
-          'out': { position: 'bottom', attrs: { circle: { r: 3, magnet: true, fill: '#f59e0b' } } }
+          in: createPort('top', {
+            magnet: 'passive',
+            fill: theme.surfaceSoft,
+            stroke: theme.cyanSoft,
+            radius: 3,
+            strokeWidth: 1
+          }),
+          out: createPort('bottom', {
+            magnet: true,
+            fill: theme.cyanDark,
+            stroke: theme.portStroke,
+            radius: 3,
+            strokeWidth: 1
+          })
         },
         items: [
           { group: 'in', id: 'j-in1' },
@@ -1121,25 +1335,48 @@ startVisualTour(tourType: string) {
         ]
       });
     }
+
     else if (nodeType === 'merge') {
       node = new joint.shapes.standard.Polygon();
-      node.set('nodeType', 'merge');
+
       node.position(x - 30, y - 30);
       node.resize(60, 60);
+      node.set('nodeType', 'merge');
+
       node.attr({
         body: {
           refPoints: '10,0 20,10 10,20 0,10',
-          fill: '#1a1a1a',
-          stroke: '#a855f7', // Púrpura Neón para Merge
+          fill: theme.surface,
+          stroke: theme.violet,
           strokeWidth: 2
         },
-        label: { text: label || 'MERGE', fill: '#d8b4fe', fontSize: 10, refY: '100%', refY2: 5 }
+        label: {
+          text: label || 'MERGE',
+          fill: '#c4b5fd',
+          fontSize: 10,
+          fontWeight: 'bold',
+          refY: '100%',
+          refY2: 5
+        }
       });
+
       node.set('ports', {
         groups: {
-          'in': { position: 'top', attrs: { circle: { r: 5, magnet: 'passive', fill: '#fff' } } },
-          'inSide': { position: 'left', attrs: { circle: { r: 5, magnet: 'passive', fill: '#fff' } } },
-          'out': { position: 'bottom', attrs: { circle: { r: 5, magnet: true, fill: '#a855f7' } } }
+          in: createPort('top', {
+            magnet: 'passive',
+            fill: theme.surfaceSoft,
+            stroke: theme.violet
+          }),
+          inSide: createPort('left', {
+            magnet: 'passive',
+            fill: theme.surfaceSoft,
+            stroke: theme.violet
+          }),
+          out: createPort('bottom', {
+            magnet: true,
+            fill: theme.violet,
+            stroke: theme.portStroke
+          })
         },
         items: [
           { group: 'in', id: 'in-top' },
@@ -1148,28 +1385,51 @@ startVisualTour(tourType: string) {
         ]
       });
     }
+
     else {
       node = new joint.shapes.standard.Rectangle();
-      node.position(x - (dimension.width / 2), y - (dimension.height / 2));
-      node.resize(140, 70); // Un poco más grande para el diseño profesional
-      node.set('nodeType', 'action'); // Aseguramos el tipo para el panel
+
+      node.position(x - dimension.width / 2, y - dimension.height / 2);
+      node.resize(140, 70);
+      node.set('nodeType', 'action');
+
       node.attr({
         body: {
-          fill: 'linear-gradient(to bottom right, #0a0a0a, #1a1a1a)',
-          stroke: '#3b82f6',
+          fill: {
+            type: 'linearGradient',
+            stops: [
+              { offset: '0%', color: theme.surfaceSoft },
+              { offset: '100%', color: theme.surface }
+            ]
+          },
+          stroke: theme.cyanDark,
           strokeWidth: 2,
-          rx: 10, ry: 10,
-          filter: { name: 'dropShadow', args: { dx: 0, dy: 2, blur: 5, color: '#000000' } }
+          rx: 10,
+          ry: 10,
+          filter: {
+            name: 'dropShadow',
+            args: {
+              dx: 0,
+              dy: 3,
+              blur: 6,
+              color: 'rgba(0, 0, 0, 0.35)'
+            }
+          }
         },
         label: {
           text: label.toUpperCase(),
-          fill: '#ffffff',
+          fill: theme.text,
           fontSize: 10,
           fontWeight: 'bold',
-          fontFamily: 'Inter',
-          textWrap: { width: 120, height: 50, ellipsis: true }
+          fontFamily: 'Inter, sans-serif',
+          textWrap: {
+            width: 120,
+            height: 50,
+            ellipsis: true
+          }
         }
       });
+
       node.set('ports', inOutPorts);
     }
 
@@ -1277,9 +1537,9 @@ startVisualTour(tourType: string) {
       error: (err) => {
         this.isAiTyping = false;
         console.error("Error de conexión con Jarvis:", err);
-        this.chatMessages.push({ 
-          role: 'assistant', 
-          content: 'Lo siento, Elías. Perdí la conexión con el núcleo de procesamiento.' 
+        this.chatMessages.push({
+          role: 'assistant',
+          content: 'Lo siento, Elías. Perdí la conexión con el núcleo de procesamiento.'
         });
         this.cdr.detectChanges();
       }
@@ -1288,105 +1548,130 @@ startVisualTour(tourType: string) {
 
 
 
+  applyAiSuggestion(payload: any): void {
+    console.log('⚙️ Ejecutando orden de la IA:', payload);
 
-
-
-
-
-
-
-
-
-
-
-applyAiSuggestion(payload: any) {
-    console.log("⚙️ Ejecutando orden de la IA:", payload);
-
-    if (!payload || !payload.nodes) {
-      console.warn("La IA no envió un payload válido con nodos.");
+    if (!payload || !Array.isArray(payload.nodes)) {
+      console.warn('La IA no envió un payload válido con nodos.');
       return;
     }
+
+    const theme = {
+      link: '#22d3ee',
+      linkHover: '#67e8f9',
+      marker: '#22d3ee'
+    };
 
     // 1. Calculamos el centro actual de la pantalla
     const scale = this.paper.scale().sx;
     const translate = this.paper.translate();
-    const centerX = (this.paperContainer.nativeElement.clientWidth / 2 - translate.tx) / scale;
-    let startY = (this.paperContainer.nativeElement.clientHeight / 2 - translate.ty) / scale;
+
+    const centerX =
+      (this.paperContainer.nativeElement.clientWidth / 2 - translate.tx) / scale;
+
+    const startY =
+      (this.paperContainer.nativeElement.clientHeight / 2 - translate.ty) / scale;
 
     // Diccionario para enlazar los IDs temporales de la IA con los IDs reales de JointJS
-    const createdNodes: { [key: string]: joint.dia.Element } = {};
+    const createdNodes: Record<string, joint.dia.Element> = {};
 
-    // 2. DIBUJAMOS LOS NODOS
-    if (Array.isArray(payload.nodes)) {
-      payload.nodes.forEach((aiNode: any, index: number) => {
-        
-        // Preparamos los datos básicos
-        const info = {
-          nodeType: aiNode.type || 'action',
-          label: aiNode.name || 'NUEVO NODO IA',
-          dimension: { width: 140, height: 70 }
-        };
-
-        // Apilamos los nodos hacia abajo
-        const yPos = startY + (index * 100);
-        const cellsBefore = this.graph.getCells().length;
-        
-        // Usamos tu propia fábrica para mantener los estilos ciberpunk
-        this.createJointNode(centerX, yPos, info);
-        
-        const cellsAfter = this.graph.getCells();
-        if (cellsAfter.length > cellsBefore) {
-          const newNode = cellsAfter[cellsAfter.length - 1] as joint.dia.Element;
-          
-          // 🚀 SI LA IA ENVIÓ CONFIGURACIONES, SE LAS INYECTAMOS AL NODO
-          if (aiNode.description) newNode.set('nodeDescription', aiNode.description);
-          if (aiNode.config) newNode.set('userData', aiNode.config);
-
-          // Guardamos referencia por si hay que conectarle flechas
-          if (aiNode.id) {
-             createdNodes[aiNode.id] = newNode;
-          }
+    // 2. Dibujamos los nodos
+    payload.nodes.forEach((aiNode: any, index: number) => {
+      const info = {
+        nodeType: aiNode.type || 'action',
+        label: aiNode.name || 'NUEVO NODO IA',
+        dimension: {
+          width: 140,
+          height: 70
         }
-      });
-    }
+      };
 
-    // 3. DIBUJAMOS LAS FLECHAS (EDGES)
-    if (payload.edges && Array.isArray(payload.edges)) {
+      const yPos = startY + index * 100;
+      const cellsBefore = this.graph.getCells().length;
+
+      // Usamos la fábrica principal para mantener el estilo visual del diagramador
+      this.createJointNode(centerX, yPos, info);
+
+      const cellsAfter = this.graph.getCells();
+
+      if (cellsAfter.length <= cellsBefore) {
+        return;
+      }
+
+      const newNode = cellsAfter[cellsAfter.length - 1] as joint.dia.Element;
+
+      // Si la IA envió configuración adicional, la inyectamos al nodo
+      if (aiNode.description) {
+        newNode.set('nodeDescription', aiNode.description);
+      }
+
+      if (aiNode.config) {
+        newNode.set('userData', aiNode.config);
+      }
+
+      // Guardamos referencia para conectar flechas después
+      if (aiNode.id) {
+        createdNodes[aiNode.id] = newNode;
+      }
+    });
+
+    // 3. Dibujamos las conexiones
+    if (Array.isArray(payload.edges)) {
       payload.edges.forEach((edge: any) => {
-        
-        const sourceNode = createdNodes[edge.source] || this.graph.getCell(edge.source);
-        const targetNode = createdNodes[edge.target] || this.graph.getCell(edge.target);
+        const sourceNode =
+          createdNodes[edge.source] || this.graph.getCell(edge.source);
 
-        if (sourceNode && targetNode) {
-          // 🚀 AQUÍ ESTÁ LA MAGIA: Leemos el puerto de la IA o usamos el estándar por defecto
-          const sPort = edge.sourcePort || 'out';
-          const tPort = edge.targetPort || 'in';
+        const targetNode =
+          createdNodes[edge.target] || this.graph.getCell(edge.target);
 
-          const link = new joint.shapes.standard.Link({
-            source: { id: sourceNode.id, port: sPort }, 
-            target: { id: targetNode.id, port: tPort },  
-            attrs: {
-              line: { stroke: '#10b981', strokeWidth: 2, targetMarker: { type: 'path', d: 'M 10 -5 0 0 10 5 Z', fill: '#10b981', stroke: 'none' } }
-            },
-            router: { name: 'manhattan' },
-            connector: { name: 'rounded' }
-          });
-          this.graph.addCell(link);
+        if (!sourceNode || !targetNode) {
+          console.warn('No se pudo crear conexión IA. Nodo origen o destino no encontrado:', edge);
+          return;
         }
+
+        const sourcePort = edge.sourcePort || 'out';
+        const targetPort = edge.targetPort || 'in';
+
+        const link = new joint.shapes.standard.Link({
+          source: {
+            id: sourceNode.id,
+            port: sourcePort
+          },
+          target: {
+            id: targetNode.id,
+            port: targetPort
+          },
+          attrs: {
+            line: {
+              stroke: theme.link,
+              strokeWidth: 2,
+              targetMarker: {
+                type: 'path',
+                d: 'M 10 -5 0 0 10 5 Z',
+                fill: theme.marker,
+                stroke: 'none'
+              }
+            }
+          },
+          router: {
+            name: 'manhattan'
+          },
+          connector: {
+            name: 'rounded'
+          }
+        });
+
+        this.graph.addCell(link);
       });
     }
 
     // 4. Sincronizamos con los demás colaboradores
-    this.wsService.send({ type: 'graph_update', user: this.userName, data: this.graph.toJSON() });
+    this.wsService.send({
+      type: 'graph_update',
+      user: this.userName,
+      data: this.graph.toJSON()
+    });
   }
-
-
-
-
-
-
-
-
 
 
   // Radiografía COMPLETA del diagrama actual
@@ -1405,7 +1690,7 @@ applyAiSuggestion(payload: any) {
         name: lane.attr('label/text'),
         departmentId: lane.get('departmentId')
       })),
-      
+
       // 2. Enviamos los Nodos con TODA su configuración
       nodes: elements.filter(el => !el.get('isLane')).map(node => ({
         id: String(node.id),
@@ -1415,7 +1700,7 @@ applyAiSuggestion(payload: any) {
         parentLaneId: node.get('parent') || null, // Para saber en qué depto está
         config: node.get('userData') || {} // Aquí va la multimedia, variables, etc.
       })),
-      
+
       // 3. Enviamos las conexiones exactas
       edges: links.map(link => ({
         id: String(link.id),
@@ -1435,18 +1720,18 @@ applyAiSuggestion(payload: any) {
       window.speechSynthesis.cancel(); // Detenemos si estaba hablando algo antes
 
       // Limpiamos el texto de asteriscos (markdown) para que la voz suene natural
-      const cleanText = text.replace(/[*#_]/g, ''); 
-      
+      const cleanText = text.replace(/[*#_]/g, '');
+
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      
+
       // Buscar una voz en español
       const voices = window.speechSynthesis.getVoices();
       const spanishVoice = voices.find(v => v.lang.includes('es'));
       if (spanishVoice) utterance.voice = spanishVoice;
-      
+
       utterance.rate = 1.05; // Un poco más rápido
       utterance.pitch = 0.9; // Tono ligeramente más robótico/grave
-      
+
       window.speechSynthesis.speak(utterance);
     }
   }

@@ -1,12 +1,17 @@
 import os
-import google.generativeai as genai
+from dotenv import load_dotenv
+from google import genai
 
-# Pon tu API KEY real aquí
-GEMINI_API_KEY ="HYI"
-genai.configure(api_key=GEMINI_API_KEY)
+load_dotenv(".env")
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise ValueError("Falta GEMINI_API_KEY en el archivo .env_docker")
+
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 print("🔍 Buscando modelos disponibles para tu API Key...\n")
 
-for m in genai.list_models():
-    if 'generateContent' in m.supported_generation_methods:
-        print(f"✅ Modelo válido: {m.name}")
+for model in client.models.list():
+    print(f"✅ Modelo disponible: {model.name}")

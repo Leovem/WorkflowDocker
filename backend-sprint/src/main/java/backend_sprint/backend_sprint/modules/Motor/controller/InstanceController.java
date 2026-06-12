@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,11 +22,14 @@ import backend_sprint.backend_sprint.modules.Motor.DTO.StartRequest;
 import backend_sprint.backend_sprint.modules.Motor.model.Instance;
 import backend_sprint.backend_sprint.modules.Motor.repository.InstanceRepository;
 import backend_sprint.backend_sprint.modules.Motor.service.InstanceService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/instance")
 @PreAuthorize("hasAnyAuthority('Recepcionista', 'RECEPCIONISTA', 'Funcionario', 'FUNCIONARIO')")
 public class InstanceController {
+
+    private static final Logger log = LoggerFactory.getLogger(InstanceController.class);
 
     private final InstanceService instanceService;
     private final InstanceRepository instanceRepo;
@@ -31,131 +37,80 @@ public class InstanceController {
     public InstanceController(InstanceService instanceService, InstanceRepository instanceRepo) {
         this.instanceService = instanceService;
         this.instanceRepo = instanceRepo;
-
     }
 
     @PostMapping("/start")
-    public ResponseEntity<?> start(@RequestBody StartRequest request) { // Usamos <?> para devolver texto o la Instancia
+    public ResponseEntity<Instance> start(@Valid @RequestBody StartRequest request) { 
+        // @Valid ejecuta las validaciones automáticas de tu DTO (@NotBlank)
         
-        System.out.println("=== NUEVA PETICIÓN RECIBIDA ===");
+        log.info("=== NUEVA PETICIÓN RECIBIDA ===");
+        log.info("Policy ID: {}", request.getPolicyId());
+        log.info("Nombre: {}", request.getName());
+        log.info("Email: {}", request.getEmail());
+        log.info("Documento: {}", request.getDocumentId());
+        log.info("===============================");
+
+        Instance instance = instanceService.createInstance(
+            request.getPolicyId(),
+            request.getName(),
+            request.getEmail(),
+            request.getDocumentId(),
+            request.getWorkflow()
+        );
         
-        // 🚀 1. VALIDACIÓN: ¿Llegó el objeto completamente nulo?
-        if (request == null) {
-            System.out.println("❌ ERROR: El body de la petición es null");
-            return ResponseEntity.badRequest().body("La petición llegó vacía o el JSON está mal formado.");
-        }
-
-        System.out.println("Policy ID: " + request.getPolicyId());
-        System.out.println("Nombre: " + request.getName());
-        System.out.println("Email: " + request.getEmail());
-        System.out.println("Documento: " + request.getDocumentId());
-        System.out.println("Datos Dinámicos: " + request.getWorkflow()); 
-        System.out.println("===============================");
-
-        // 🚀 2. EXCEPCIONES/VALIDACIONES MANUALES
-        if (request.getPolicyId() == null || request.getPolicyId().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("El ID de la política (policyId) es obligatorio.");
-        }
-        if (request.getName() == null || request.getName().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("El nombre del solicitante es obligatorio.");
-        }
-        if (request.getDocumentId() == null || request.getDocumentId().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("El documento de identidad es obligatorio.");
-        }
-
-        // 🚀 3. EJECUCIÓN SEGURA
-        try {
-            Instance instance = instanceService.createInstance(
-                request.getPolicyId(),
-                request.getName(),
-                request.getEmail(),
-                request.getDocumentId(),
-                request.getWorkflow()
-            );
-            return ResponseEntity.ok(instance); // Devuelve 200 OK con el objeto guardado
-            
-        } catch (IllegalArgumentException e) {
-            // Si tu servicio lanza excepciones por lógica de negocio (ej. "La política no existe")
-            System.err.println("❌ Error de negocio: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-            
-        } catch (Exception e) {
-            // Cualquier otro error de base de datos o de Java
-            System.err.println("❌ Error interno del servidor: " + e.getMessage());
-            return ResponseEntity.internalServerError().body("Ocurrió un error al crear el trámite en el servidor.");
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(instance); 
     }
-
 
     @GetMapping("/all")
     public ResponseEntity<List<InstanceResponse>> getAllInstances() {
-        System.out.println("=== SOLICITANDO LISTA DE TRÁMITES CON PERFILES ===");
+        log.info("=== SOLICITANDO LISTA DE TRÁMITES CON PERFILES ===");
         List<InstanceResponse> responseList = instanceService.getAllInstancesWithProfiles();
         return ResponseEntity.ok(responseList);
     }
 
-
-// 🚀 MÉTODO CON MANEJO DE ERRORES ROBUSTO
     @GetMapping("/{departmentId}/current-node")
-    public ResponseEntity<?> listarTareasPendientes(@PathVariable String departmentId) {
-        System.out.println("📥 [INBOX] Petición recibida para el departamento: " + departmentId);
+    public ResponseEntity<List<Map<String, Object>>> listarTareasPendientes(@PathVariable String departmentId) {
+        log.info("📥 [INBOX] Petición recibida para el departamento: {}", departmentId);
         
         if (departmentId == null || departmentId.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "El ID del departamento es requerido"));
+            return ResponseEntity.badRequest().build(); 
         }
 
-        try {
-            List<Map<String, Object>> respuesta = instanceService.getPendingTasksForDepartment(departmentId);
-            
-            if (respuesta.isEmpty()) {
-                System.out.println("ℹ️ [INBOX] No hay tareas pendientes para: " + departmentId);
-                return ResponseEntity.ok(new ArrayList<>()); // Devuelve array vacío limpio
-            }
-
-            System.out.println("✅ [INBOX] Se enviaron " + respuesta.size() + " tareas al depto: " + departmentId);
-            System.out.println("Detalles de la respuesta: " + respuesta);
-            return ResponseEntity.ok(respuesta);
-
-        } catch (Exception e) {
-            System.err.println("🔥 [INBOX] Error crítico al obtener la bandeja: " + e.getMessage());
-            e.printStackTrace(); 
-            return ResponseEntity.internalServerError().body(Map.of(
-                "error", "Ocurrió un problema interno al cargar las tareas",
-                "details", e.getMessage()
-            ));
+        List<Map<String, Object>> respuesta = instanceService.getPendingTasksForDepartment(departmentId);
+        
+        if (respuesta.isEmpty()) {
+            log.info("ℹ️ [INBOX] No hay tareas pendientes para: {}", departmentId);
+            return ResponseEntity.ok(new ArrayList<>()); 
         }
+
+        log.info("✅ [INBOX] Se enviaron {} tareas al depto: {}", respuesta.size(), departmentId);
+        return ResponseEntity.ok(respuesta);
     }
 
-
     @PostMapping("/{id}/complete/{nodeId}")
-    public ResponseEntity<?> completarTarea(@PathVariable String id, @PathVariable String nodeId, @RequestBody Map<String, Object> formData) {
+    public ResponseEntity<Map<String, Object>> completarTarea(
+            @PathVariable String id, 
+            @PathVariable String nodeId, 
+            @RequestBody Map<String, Object> formData) {
 
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        System.out.println("✅ [COMPLETE] Petición para completar tarea en instancia: " + id + ", nodo: " + nodeId);
-        System.out.println("Datos recibidos para completar la tarea: " + formData);
-        try {
-            Instance resultado = instanceService.completarTareaHumana(id, nodeId, formData, currentUser);
-            return ResponseEntity.ok(Map.of(
-                "message", "Tarea completada y motor avanzado exitosamente",
-                "instance", resultado
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        log.info("✅ [COMPLETE] Petición para completar tarea en instancia: {}, nodo: {}", id, nodeId);
+        log.info("Datos recibidos para completar la tarea: {}", formData);
+        
+        Instance resultado = instanceService.completarTareaHumana(id, nodeId, formData, currentUser);
+        
+        return ResponseEntity.ok(Map.of(
+            "message", "Tarea completada y motor avanzado exitosamente",
+            "instance", resultado
+        ));
     }
-
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getInstanceById(@PathVariable String id) {
-        try {
-            System.out.println("🔍 Buscando expediente completo de la Instancia: " + id);
-            return instanceRepo.findById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error al buscar la instancia: " + e.getMessage());
-        }
+    public ResponseEntity<Instance> getInstanceById(@PathVariable String id) {
+        log.info("🔍 Buscando expediente completo de la Instancia: {}", id);
+        return instanceRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-
 }

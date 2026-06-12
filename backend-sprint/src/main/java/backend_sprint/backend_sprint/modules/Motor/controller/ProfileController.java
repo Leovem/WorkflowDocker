@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +21,13 @@ import backend_sprint.backend_sprint.modules.Motor.DTO.LoginRequest;
 import backend_sprint.backend_sprint.modules.Motor.model.EphemeralProfile;
 import backend_sprint.backend_sprint.modules.Motor.repository.EphemeralProfileRepository;
 import backend_sprint.backend_sprint.modules.Motor.service.InstanceService;
-
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/profiles")
 public class ProfileController {
+
+    private static final Logger log = LoggerFactory.getLogger(ProfileController.class);
 
     private final EphemeralProfileRepository profileRepo;
     private final InstanceService instanceService;
@@ -33,18 +37,12 @@ public class ProfileController {
         this.instanceService = instanceService;
     }
 
-
-
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        String token = request.getToken();
-
-        if (token == null || token.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "El token es obligatorio."));
-        }
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        // Al usar @Valid, si el token viene vacío, Spring arroja la excepción automáticamente
 
         // 1. Buscar el perfil por el token opaco
-        Optional<EphemeralProfile> profileOpt = profileRepo.findByAccessToken(token);
+        Optional<EphemeralProfile> profileOpt = profileRepo.findByAccessToken(request.getToken());
 
         if (profileOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -59,8 +57,7 @@ public class ProfileController {
                     .body(Map.of("message", "Este perfil ha sido desactivado."));
         }
 
-        // 3. Verificar expiración (CU8 - Flujo alternativo 4)
-        // Recordatorio: Si tokenExpiresAt es null, significa que el trámite está en curso.
+        // 3. Verificar expiración
         if (profile.getTokenExpiresAt() != null && profile.getTokenExpiresAt().isBefore(LocalDateTime.now())) {
             profile.setActive(false);
             profileRepo.save(profile);
@@ -80,49 +77,39 @@ public class ProfileController {
         ));
     }
 
-
     @PostMapping("/update-fcm-token")
-    public ResponseEntity<?> updateFcmToken(@RequestBody FcmTokenRequest request) {
+    public ResponseEntity<?> updateFcmToken(@Valid @RequestBody FcmTokenRequest request) {
         
         Optional<EphemeralProfile> profileOpt = profileRepo.findByAccessToken(request.getAccessToken());
 
         if (profileOpt.isEmpty()) {
-            return ResponseEntity.status(401).body(Map.of("message", "Token de acceso inválido."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Token de acceso inválido."));
         }
-        System.err.println("🔔 [MÓVIL] Actualizando token FCM para el perfil: " + profileOpt.get().getId());
+        
+        // CORREGIDO: Uso de Logger en vez de System.err
+        log.info("🔔 [MÓVIL] Actualizando token FCM para el perfil: {}", profileOpt.get().getId());
 
         EphemeralProfile profile = profileOpt.get();
-        
-        // Guardamos el token del celular en la base de datos
         profile.setFcmToken(request.getFcmToken());
         profileRepo.save(profile);
 
         return ResponseEntity.ok(Map.of("message", "Token de notificaciones actualizado correctamente."));
     }
     
-
-
-
-    // 🚀 NUEVO: Endpoint para la app móvil del ciudadano
     @GetMapping("/profile/{profileId}")
-    public ResponseEntity<?> getCitizenInstances(@PathVariable String profileId) {
-        System.out.println("📱 [MÓVIL] Petición de historial recibida para el usuario: " + profileId);
+    public ResponseEntity<List<Map<String, Object>>> getCitizenInstances(@PathVariable String profileId) {
+        // CORREGIDO: Uso de Logger en vez de System.out
+        log.info("📱 [MÓVIL] Petición de historial recibida para el usuario: {}", profileId);
         
         if (profileId == null || profileId.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "El ID del perfil es requerido"));
+            return ResponseEntity.badRequest().build();
         }
 
-        try {
-            List<Map<String, Object>> respuesta = instanceService.getInstancesForMobile(profileId);
-            
-            System.out.println("✅ [MÓVIL] Se enviaron " + respuesta.size() + " trámites al ciudadano.");
-            return ResponseEntity.ok(respuesta); // Retorna un array JSON 
-
-        } catch (Exception e) {
-            System.err.println("🔥 [MÓVIL] Error al obtener el historial del ciudadano: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(Map.of(
-                "error", "Ocurrió un problema interno al cargar los trámites"
-            ));
-        }
+        // CORREGIDO: Eliminamos el try-catch genérico. Cualquier excepción vuela directamente al GlobalExceptionHandler
+        List<Map<String, Object>> respuesta = instanceService.getInstancesForMobile(profileId);
+        
+        log.info("✅ [MÓVIL] Se enviaron {} trámites al ciudadano.", respuesta.size());
+        return ResponseEntity.ok(respuesta); 
     }
 }

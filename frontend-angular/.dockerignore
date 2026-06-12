@@ -1,3 +1,9 @@
 node_modules
 dist
+.angular
 .git
+.gitignore
+Dockerfile
+npm-debug.log
+.env
+.env.prod

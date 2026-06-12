@@ -1,0 +1,144 @@
+<div class="flex h-full min-h-screen flex-col bg-[#020617] text-white">
+
+  <header class="flex h-16 items-center justify-between border-b border-cyan-950/80 bg-[#020617] px-6">
+    <div>
+      <h1 class="text-sm font-black uppercase tracking-widest text-cyan-300">
+        Editor colaborativo de documentos
+      </h1>
+
+      <p class="text-xs text-slate-500">
+        Documento: {{ documentId }}
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span
+        class="rounded-full px-3 py-1 text-xs font-bold"
+        [class.bg-emerald-500]="isConnected()"
+        [class.bg-red-500]="!isConnected()"
+      >
+        {{ isConnected() ? 'Conectado' : 'Desconectado' }}
+      </span>
+
+      <div class="flex items-center -space-x-2">
+        <div
+          *ngFor="let user of activeUsers()"
+          class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-950 text-xs font-black text-white"
+          [style.backgroundColor]="user.color"
+          [title]="user.name"
+        >
+          {{ user.name?.charAt(0) || '?' }}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-950/80 bg-[#071527] px-6 py-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        (click)="setHeading(1)"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        H1
+      </button>
+
+      <button
+        type="button"
+        (click)="setHeading(2)"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        H2
+      </button>
+
+      <button
+        type="button"
+        (click)="setHeading(3)"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        H3
+      </button>
+
+      <button
+        type="button"
+        (click)="toggleBold()"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        B
+      </button>
+
+      <button
+        type="button"
+        (click)="toggleItalic()"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold italic hover:bg-cyan-900"
+      >
+        I
+      </button>
+
+      <button
+        type="button"
+        (click)="toggleBulletList()"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        Lista
+      </button>
+
+      <button
+        type="button"
+        (click)="toggleOrderedList()"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        1.
+      </button>
+
+      <button
+        type="button"
+        (click)="undo()"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        Undo
+      </button>
+
+      <button
+        type="button"
+        (click)="redo()"
+        class="rounded bg-slate-800 px-3 py-1 text-xs font-bold hover:bg-cyan-900"
+      >
+        Redo
+      </button>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <span
+        *ngIf="saveMessage()"
+        class="text-xs font-medium"
+        [class.text-emerald-300]="!saveMessage().includes('No se pudo')"
+        [class.text-red-300]="saveMessage().includes('No se pudo')"
+      >
+        {{ saveMessage() }}
+      </span>
+
+      <span
+        *ngIf="lastSavedAt()"
+        class="text-[11px] text-slate-500"
+      >
+        Último guardado: {{ lastSavedAt() | date:'short' }}
+      </span>
+
+      <button
+        type="button"
+        class="rounded-lg bg-cyan-400 px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-40"
+        [disabled]="isSaving() || !editor"
+        (click)="saveSnapshot()"
+      >
+        {{ isSaving() ? 'Guardando...' : 'Guardar versión' }}
+      </button>
+    </div>
+  </div>
+
+  <main class="flex-1 overflow-y-auto bg-slate-200 px-6 py-8 text-black">
+    <div class="mx-auto max-w-5xl rounded-lg bg-white p-6 shadow-md min-h-[500px]">
+      <div *ngIf="editor" tiptap [editor]="editor"></div>
+    </div>
+  </main>
+</div>

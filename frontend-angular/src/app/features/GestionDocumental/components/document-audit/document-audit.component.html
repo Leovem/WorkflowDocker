@@ -1,0 +1,83 @@
+<section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h3 class="text-base font-semibold text-slate-800">
+        Auditoría documental
+      </h3>
+      <p class="text-sm text-slate-500">
+        Historial de acciones realizadas sobre este documento.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      [disabled]="isLoading"
+      (click)="loadAudit()"
+    >
+      {{ isLoading ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading" class="py-6 text-center text-sm text-slate-500">
+    Cargando auditoría...
+  </div>
+
+  <div
+    *ngIf="!isLoading && auditLogs.length === 0"
+    class="rounded-xl border border-dashed border-slate-300 p-5 text-center"
+  >
+    <p class="text-sm text-slate-500">
+      Todavía no hay registros de auditoría para este documento.
+    </p>
+  </div>
+
+  <div *ngIf="!isLoading && auditLogs.length > 0" class="space-y-3">
+    <article
+      *ngFor="let log of auditLogs"
+      class="rounded-xl border border-slate-200 p-3"
+    >
+      <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <span
+          class="inline-flex rounded-full border px-2 py-1 text-xs font-medium"
+          [ngClass]="getActionClass(log.action)"
+        >
+          {{ getActionLabel(log.action) }}
+        </span>
+
+        <span class="text-xs text-slate-500">
+          {{ log.createdAt | date: 'medium' }}
+        </span>
+      </div>
+
+      <div class="grid gap-1 text-sm text-slate-700">
+        <p>
+          <span class="font-medium">Usuario:</span>
+          {{ log.userName || 'Sin usuario' }}
+        </p>
+
+        <p *ngIf="log.previousStatus || log.newStatus">
+          <span class="font-medium">Estado:</span>
+          {{ log.previousStatus || '-' }} → {{ log.newStatus || '-' }}
+        </p>
+
+        <p *ngIf="log.observation">
+          <span class="font-medium">Observación:</span>
+          {{ log.observation }}
+        </p>
+
+        <p *ngIf="log.metadata" class="break-all text-xs text-slate-500">
+          <span class="font-medium">Metadata:</span>
+          {{ formatMetadata(log.metadata) }}
+        </p>
+      </div>
+    </article>
+  </div>
+</section>

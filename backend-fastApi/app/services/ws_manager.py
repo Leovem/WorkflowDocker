@@ -24,8 +24,6 @@ class ConnectionManager:
 
 
 
-
-
     async def disconnect(self, websocket: WebSocket, politica_id: str):
         if politica_id in self.active_connections:
             if websocket in self.active_connections[politica_id]:

@@ -1,0 +1,349 @@
+<section class="w-full rounded-xl border border-cyan-400/20 bg-[#08111f] p-3 text-slate-200 shadow-sm">
+
+  <div class="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h3 class="text-sm font-bold uppercase tracking-[0.12em] text-cyan-300">
+        Repository documental
+      </h3>
+      <p class="text-xs text-slate-400">
+        Adjunta, revisa y aprueba los documentos requeridos para esta tarea.
+      </p>
+    </div>
+
+    <button type="button"
+      class="rounded-lg border border-cyan-400/20 px-3 py-1.5 text-xs font-medium text-cyan-300 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-50"
+      (click)="loadDocuments()" [disabled]="isLoading">
+      {{ isLoading ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </div>
+
+  <div *ngIf="!policyId || !processInstanceId || !clientId"
+    class="mb-3 rounded-lg border border-yellow-400/30 bg-yellow-400/10 p-2 text-xs text-yellow-200">
+    Faltan datos del trámite para asociar documentos correctamente.
+  </div>
+
+  <div *ngIf="requiredDocuments && requiredDocuments.length > 0"
+    class="mb-3 rounded-lg border border-blue-400/20 bg-blue-400/10 p-2">
+    <p class="mb-2 text-xs font-semibold text-blue-300">
+      Documentos requeridos
+    </p>
+
+    <div class="flex flex-wrap gap-1.5">
+      <span *ngFor="let requiredDocument of requiredDocuments"
+        class="rounded-full border border-blue-400/20 bg-[#06101d] px-2 py-0.5 text-[11px] font-medium text-blue-200">
+        {{ requiredDocument }}
+      </span>
+    </div>
+  </div>
+
+  <div class="mb-3 rounded-lg border border-cyan-400/10 bg-[#06101d] p-2">
+    <div class="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_auto] md:items-end">
+
+      <div *ngIf="requiredDocuments && requiredDocuments.length > 0">
+        <label class="mb-1 block text-[11px] font-medium text-slate-400">
+          Documento requerido
+        </label>
+
+        <select
+          class="block w-full rounded-lg border border-cyan-400/20 bg-[#08111f] px-2 py-1.5 text-xs text-slate-200 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
+          [(ngModel)]="selectedRequiredDocumentName">
+          <option value="">
+            Selecciona...
+          </option>
+
+          <option *ngFor="let requiredDocument of requiredDocuments" [value]="requiredDocument">
+            {{ requiredDocument }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-[11px] font-medium text-slate-400">
+          Archivo
+        </label>
+
+        <input type="file"
+          class="block w-full rounded-lg border border-cyan-400/20 bg-[#08111f] px-2 py-1.5 text-xs text-slate-300 file:mr-2 file:rounded-md file:border-0 file:bg-cyan-400/10 file:px-2 file:py-1 file:text-[11px] file:font-semibold file:text-cyan-300"
+          (change)="onFileSelected($event)" />
+      </div>
+
+      <button type="button"
+        class="rounded-lg bg-cyan-400 px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-40"
+        [disabled]="
+          !selectedFile ||
+          isUploading ||
+          !policyId ||
+          !processInstanceId ||
+          !clientId ||
+          (requiredDocuments.length > 0 && !selectedRequiredDocumentName)
+        " (click)="uploadSelectedFile()">
+        {{ isUploading ? 'Subiendo...' : 'Subir' }}
+      </button>
+    </div>
+
+    <p *ngIf="selectedFile" class="mt-2 text-[11px] text-slate-400">
+      Archivo seleccionado:
+      <span class="font-medium text-cyan-200">
+        {{ selectedFile.name }}
+      </span>
+    </p>
+
+    <p *ngIf="requiredDocuments.length > 0 && !selectedRequiredDocumentName" class="mt-2 text-[11px] text-yellow-300">
+      Selecciona el documento requerido antes de subir.
+    </p>
+  </div>
+
+  <div class="mb-3 rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2">
+    <div class="mb-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-indigo-300">
+          Documentos colaborativos
+        </h3>
+
+        <p class="text-[11px] text-slate-400">
+          Crea documentos editables tipo Google Docs asociados a esta tarea.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto] md:items-end">
+      <div>
+        <label class="mb-1 block text-[11px] font-medium text-slate-400">
+          Nombre del documento
+        </label>
+
+        <input type="text"
+          class="block w-full rounded-lg border border-indigo-400/20 bg-[#08111f] px-2 py-1.5 text-xs text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400/30"
+          placeholder="Ej: Informe de revisión" [(ngModel)]="newCollaborativeDocumentTitle" />
+      </div>
+
+      <button type="button"
+        class="rounded-lg bg-indigo-400 px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-40"
+        [disabled]="
+          isCreatingCollaborativeDocument ||
+          !newCollaborativeDocumentTitle.trim() ||
+          !policyId ||
+          !processInstanceId ||
+          !clientId ||
+          !nodeId ||
+          !departmentId
+        " (click)="createCollaborativeDocument()">
+        {{ isCreatingCollaborativeDocument ? 'Creando...' : 'Crear documento' }}
+      </button>
+    </div>
+
+    <div *ngIf="collaborativeDocuments.length === 0"
+      class="mt-3 rounded-lg border border-dashed border-indigo-400/20 p-3 text-center">
+      <p class="text-[11px] text-slate-400">
+        Todavía no hay documentos colaborativos creados para esta tarea.
+      </p>
+    </div>
+
+    <div *ngIf="collaborativeDocuments.length > 0" class="mt-3 overflow-x-auto rounded-lg border border-indigo-400/10">
+      <table class="min-w-full text-left text-xs">
+        <thead class="bg-indigo-400/10 text-indigo-300">
+          <tr>
+            <th class="px-2 py-2 font-semibold">Título</th>
+            <th class="px-2 py-2 font-semibold">Creado por</th>
+            <th class="px-2 py-2 font-semibold">Fecha</th>
+            <th class="px-2 py-2 text-right font-semibold">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-indigo-400/10">
+          <tr *ngFor="let collaborativeDocument of collaborativeDocuments"
+            class="text-slate-300 transition hover:bg-indigo-400/5">
+            <td class="px-2 py-2">
+              <p class="max-w-[260px] truncate font-medium text-slate-100">
+                {{ collaborativeDocument.title }}
+              </p>
+            </td>
+
+            <td class="px-2 py-2 text-slate-400">
+              {{ collaborativeDocument.createdByUserName || 'Sin usuario' }}
+            </td>
+
+            <td class="px-2 py-2 text-slate-400">
+              {{ collaborativeDocument.createdAt | date:'short' }}
+            </td>
+
+            <td class="px-2 py-2 text-right">
+              <button type="button"
+                class="rounded border border-indigo-400/20 px-2 py-1 text-[10px] font-medium text-indigo-300 transition hover:bg-indigo-400/10"
+                (click)="openCollaborativeDocument(collaborativeDocument)">
+                Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage"
+    class="mb-2 rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-2 text-xs text-emerald-300">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-2 rounded-lg border border-red-400/30 bg-red-400/10 p-2 text-xs text-red-300">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading"
+    class="rounded-lg border border-cyan-400/10 bg-[#06101d] py-4 text-center text-xs text-slate-400">
+    Cargando documentos...
+  </div>
+
+  <div *ngIf="!isLoading && documents.length === 0"
+    class="rounded-lg border border-dashed border-cyan-400/20 p-4 text-center">
+    <p class="text-xs text-slate-400">
+      Todavía no hay documentos registrados para este trámite o nodo.
+    </p>
+  </div>
+
+  <div *ngIf="!isLoading && documents.length > 0" class="overflow-x-auto rounded-lg border border-cyan-400/10">
+    <table class="min-w-full border-collapse text-left text-xs">
+      <thead class="bg-cyan-400/10 text-cyan-300">
+        <tr>
+          <th class="px-2 py-2 font-semibold">Archivo</th>
+          <th class="px-2 py-2 font-semibold">Requisito</th>
+          <th class="px-2 py-2 font-semibold">Estado</th>
+          <th class="px-2 py-2 font-semibold">Versión</th>
+          <th class="px-2 py-2 font-semibold">Subido por</th>
+          <th class="px-2 py-2 text-right font-semibold">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-cyan-400/10">
+        <tr *ngFor="let document of documents" class="align-top text-slate-300 transition hover:bg-cyan-400/5">
+          <td class="px-2 py-2">
+            <div class="max-w-[220px]">
+              <p class="truncate font-medium text-slate-100" [title]="document.originalFileName">
+                {{ document.originalFileName || 'Sin nombre' }}
+              </p>
+              <p class="mt-0.5 text-[10px] text-slate-500">
+                {{ document.contentType || 'Sin tipo' }} · {{ formatSize(document.size) }}
+              </p>
+              <p *ngIf="document.observation" class="mt-1 line-clamp-2 text-[10px] text-orange-300">
+                Obs: {{ document.observation }}
+              </p>
+            </div>
+          </td>
+
+          <td class="px-2 py-2">
+            <span *ngIf="document.requiredDocumentName; else noRequiredDocument"
+              class="inline-flex max-w-[160px] truncate rounded-full border border-blue-400/20 bg-blue-400/10 px-2 py-0.5 text-[10px] font-medium text-blue-200"
+              [title]="document.requiredDocumentName">
+              {{ document.requiredDocumentName }}
+            </span>
+            <ng-template #noRequiredDocument>
+              <span class="text-[10px] text-slate-500">
+                No especificado
+              </span>
+            </ng-template>
+          </td>
+
+          <td class="px-2 py-2">
+            <span class="inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold"
+              [ngClass]="getStatusClass(document.documentStatus)">
+              {{ getStatusLabel(document.documentStatus) }}
+            </span>
+          </td>
+
+          <td class="px-2 py-2 text-slate-400">
+            v{{ document.version || 1 }}
+          </td>
+
+          <td class="px-2 py-2">
+            <p class="max-w-[130px] truncate text-slate-300" [title]="document.uploadedByUserName">
+              {{ document.uploadedByUserName || 'Sin usuario' }}
+            </p>
+            <p class="mt-0.5 text-[10px] text-slate-500">
+              {{ document.createdAt | date: 'short' }}
+            </p>
+          </td>
+
+          <td class="px-2 py-2">
+            <div class="flex min-w-[280px] flex-col gap-1.5">
+              <div class="flex flex-wrap justify-end gap-1">
+                <button type="button"
+                  class="rounded border border-cyan-400/20 px-2 py-1 text-[10px] font-medium text-cyan-300 transition hover:bg-cyan-400/10"
+                  (click)="viewDocument(document)">
+                  Ver
+                </button>
+                <button type="button"
+                  class="rounded border border-slate-500/30 px-2 py-1 text-[10px] font-medium text-slate-300 transition hover:bg-slate-700/40"
+                  (click)="downloadDocument(document)">
+                  Descargar
+                </button>
+                <button type="button"
+                  class="rounded bg-emerald-500/90 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="isUpdatingStatus || document.documentStatus === 'APPROVED'"
+                  (click)="approveDocument(document)">
+                  Aprobar
+                </button>
+                <button type="button"
+                  class="rounded bg-orange-500/90 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="isUpdatingStatus || document.documentStatus === 'OBSERVED'"
+                  (click)="observeDocument(document)">
+                  Observar
+                </button>
+                <button type="button"
+                  class="rounded bg-red-500/90 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  [disabled]="isUpdatingStatus || document.documentStatus === 'REJECTED'"
+                  (click)="rejectDocument(document)">
+                  Rechazar
+                </button>
+              </div>
+
+              <div class="flex flex-wrap justify-end gap-1">
+                <button type="button"
+                  class="rounded border border-blue-400/20 px-2 py-1 text-[10px] font-medium text-blue-300 transition hover:bg-blue-400/10"
+                  (click)="openVersions(document)">
+                  Versiones
+                </button>
+                <button type="button"
+                  class="rounded border border-purple-400/20 px-2 py-1 text-[10px] font-medium text-purple-300 transition hover:bg-purple-400/10"
+                  (click)="openAudit(document)">
+                  Auditoría
+                </button>
+              </div>
+
+              <textarea
+                class="min-h-10 w-full rounded border border-slate-600 bg-[#06101d] px-2 py-1 text-[10px] text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30"
+                placeholder="Observación para observar o rechazar..."
+                [(ngModel)]="reviewObservation[document.id]"></textarea>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="selectedDocumentForVersions || selectedDocumentForAudit"
+    class="mt-3 rounded-xl border border-cyan-400/10 bg-[#06101d] p-3">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <div>
+        <h3 class="text-sm font-semibold text-cyan-300">
+          {{ selectedDocumentForVersions ? 'Versionamiento documental' : 'Auditoría documental' }}
+        </h3>
+        <p class="max-w-[420px] truncate text-xs text-slate-400">
+          {{ selectedDocumentForVersions?.originalFileName || selectedDocumentForAudit?.originalFileName }}
+        </p>
+      </div>
+
+      <button type="button"
+        class="rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-800"
+        (click)="closeDocumentPanels()">
+        Cerrar
+      </button>
+    </div>
+
+    <app-document-versions *ngIf="selectedDocumentForVersions" [documentId]="selectedDocumentForVersions.id"
+      [currentUserId]="currentUserId" [currentUserName]="currentUserName">
+    </app-document-versions>
+
+    <app-document-audit *ngIf="selectedDocumentForAudit" [documentId]="selectedDocumentForAudit.id">
+    </app-document-audit>
+  </div>
+</section>

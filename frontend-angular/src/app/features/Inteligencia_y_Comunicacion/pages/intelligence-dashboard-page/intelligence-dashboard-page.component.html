@@ -1,0 +1,108 @@
+<div class="min-h-screen bg-[#06101d] p-8 font-sans text-white">
+  <div class="mx-auto max-w-7xl space-y-6">
+
+    <header class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h1 class="text-3xl font-black tracking-tight text-cyan-300">
+          Centro de Inteligencia Jarvis
+        </h1>
+
+        <p class="mt-1 text-neutral-400">
+          Asistencia inteligente para requisitos, clasificación y reportes dinámicos.
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-200">
+        FastAPI IA conectado a Jarvis
+      </div>
+    </header>
+
+    <nav class="flex flex-wrap gap-2 rounded-2xl border border-cyan-950/70 bg-[#08111f] p-2">
+      <button
+        type="button"
+        class="rounded-xl px-4 py-2 text-sm font-medium transition"
+        [class.bg-cyan-400]="activeTab === 'requirements'"
+        [class.text-[#06101d]]="activeTab === 'requirements'"
+        [class.text-cyan-300]="activeTab !== 'requirements'"
+        [class.hover:bg-cyan-400/10]="activeTab !== 'requirements'"
+        (click)="setActiveTab('requirements')"
+      >
+        Identificar requisitos
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl px-4 py-2 text-sm font-medium transition"
+        [class.bg-violet-400]="activeTab === 'classification'"
+        [class.text-[#06101d]]="activeTab === 'classification'"
+        [class.text-violet-300]="activeTab !== 'classification'"
+        [class.hover:bg-violet-400/10]="activeTab !== 'classification'"
+        (click)="setActiveTab('classification')"
+      >
+        Clasificar solicitud
+      </button>
+
+      <button
+        type="button"
+        class="rounded-xl px-4 py-2 text-sm font-medium transition"
+        [class.bg-emerald-400]="activeTab === 'reports'"
+        [class.text-[#06101d]]="activeTab === 'reports'"
+        [class.text-emerald-300]="activeTab !== 'reports'"
+        [class.hover:bg-emerald-400/10]="activeTab !== 'reports'"
+        (click)="setActiveTab('reports')"
+      >
+        Interpretar reportes
+      </button>
+    </nav>
+
+    <section class="space-y-6">
+      <app-ai-requirements
+        *ngIf="activeTab === 'requirements'"
+      ></app-ai-requirements>
+
+      <app-ai-classification
+        *ngIf="activeTab === 'classification'"
+      ></app-ai-classification>
+
+      <app-ai-report-interpreter
+        *ngIf="activeTab === 'reports'"
+      ></app-ai-report-interpreter>
+    </section>
+
+    <section class="rounded-2xl border border-cyan-950/70 bg-[#08111f] p-5">
+      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">
+        Funciones disponibles
+      </h2>
+
+      <div class="mt-4 grid gap-4 md:grid-cols-3">
+        <article class="rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-4">
+          <h3 class="font-bold text-cyan-300">
+            Identificación de requisitos
+          </h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Detecta la política de negocio, documentos esperados, datos faltantes y preguntas necesarias.
+          </p>
+        </article>
+
+        <article class="rounded-xl border border-violet-400/20 bg-violet-400/10 p-4">
+          <h3 class="font-bold text-violet-300">
+            Clasificación automática
+          </h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Clasifica la solicitud por tipo de trámite, categoría, prioridad y confianza.
+          </p>
+        </article>
+
+        <article class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+          <h3 class="font-bold text-emerald-300">
+            Reportes por prompt
+          </h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Interpreta solicitudes como “reporte Excel de documentos rechazados” y sugiere filtros y endpoint.
+          </p>
+        </article>
+      </div>
+    </section>
+
+  </div>
+</div>

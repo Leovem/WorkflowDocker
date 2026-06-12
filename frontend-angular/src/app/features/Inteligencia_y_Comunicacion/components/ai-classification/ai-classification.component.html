@@ -1,0 +1,135 @@
+<section class="rounded-2xl border border-violet-900/60 bg-[#08111f] p-5 text-white shadow-lg">
+  <div class="mb-4">
+    <h2 class="text-lg font-bold text-violet-300">
+      Clasificación de solicitudes con IA
+    </h2>
+
+    <p class="text-sm text-slate-400">
+      Jarvis clasifica una solicitud según tipo de trámite, categoría, política sugerida y prioridad.
+    </p>
+  </div>
+
+  <textarea
+    class="min-h-28 w-full rounded-xl border border-violet-950 bg-[#06101d] p-3 text-sm text-slate-100 outline-none focus:border-violet-400"
+    placeholder="Ejemplo: Quiero pedir una beca universitaria porque tengo buen promedio..."
+    [(ngModel)]="solicitud"
+  ></textarea>
+
+  <div class="mt-3 flex items-center gap-2">
+    <button
+      type="button"
+      class="rounded-xl border border-violet-400/40 bg-violet-400/10 px-4 py-2 text-sm font-medium text-violet-300 hover:bg-violet-400/20 disabled:opacity-60"
+      [disabled]="isLoading"
+      (click)="classify()"
+    >
+      {{ isLoading ? 'Clasificando...' : 'Clasificar solicitud' }}
+    </button>
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-300"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="result" class="mt-5 space-y-4">
+    <div class="rounded-xl border border-violet-900/70 bg-[#0b1628] p-4">
+      <p class="text-xs font-bold uppercase text-slate-500">
+        Política sugerida
+      </p>
+
+      <h3 class="mt-1 text-xl font-bold text-violet-200">
+        {{ result.politica_sugerida }}
+      </h3>
+
+      <p class="mt-2 text-sm text-slate-400">
+        {{ result.explicacion }}
+      </p>
+
+      <div class="mt-4 flex flex-wrap gap-2 text-xs">
+        <span class="rounded-full border border-violet-400/30 px-2 py-1 text-violet-300">
+          Tipo: {{ result.tipo_solicitud }}
+        </span>
+
+        <span class="rounded-full border border-blue-400/30 px-2 py-1 text-blue-300">
+          Categoría: {{ result.categoria }}
+        </span>
+
+        <span class="rounded-full border border-cyan-400/30 px-2 py-1 text-cyan-300">
+          Confianza: {{ confidencePercent() }}%
+        </span>
+
+        <span
+          class="rounded-full border px-2 py-1"
+          [ngClass]="getPriorityClass(result.prioridad_sugerida)"
+        >
+          Prioridad: {{ result.prioridad_sugerida }}
+        </span>
+
+        <span
+          class="rounded-full border px-2 py-1"
+          [ngClass]="getHumanReviewClass(result.requiere_revision_humana)"
+        >
+          {{
+            result.requiere_revision_humana
+              ? 'Requiere revisión humana'
+              : 'No requiere revisión humana'
+          }}
+        </span>
+      </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <div class="rounded-xl border border-violet-900/70 bg-[#0b1628] p-4">
+        <h4 class="mb-3 text-sm font-bold uppercase text-violet-300">
+          Resultado de clasificación
+        </h4>
+
+        <div class="space-y-2 text-sm text-slate-300">
+          <p>
+            <span class="font-semibold text-slate-100">Tipo:</span>
+            {{ result.tipo_solicitud }}
+          </p>
+
+          <p>
+            <span class="font-semibold text-slate-100">Categoría:</span>
+            {{ result.categoria }}
+          </p>
+
+          <p>
+            <span class="font-semibold text-slate-100">Política ID:</span>
+            {{ result.politica_id || 'Sin política vinculada' }}
+          </p>
+
+          <p>
+            <span class="font-semibold text-slate-100">Prioridad:</span>
+            {{ result.prioridad_sugerida }}
+          </p>
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-violet-900/70 bg-[#0b1628] p-4">
+        <h4 class="mb-3 text-sm font-bold uppercase text-violet-300">
+          Palabras clave detectadas
+        </h4>
+
+        <div class="flex flex-wrap gap-2">
+          <span
+            *ngFor="let keyword of result.palabras_clave"
+            class="rounded-full border border-violet-400/30 bg-violet-400/10 px-2 py-1 text-xs text-violet-200"
+          >
+            {{ keyword }}
+          </span>
+
+          <span
+            *ngIf="result.palabras_clave.length === 0"
+            class="text-sm text-slate-500"
+          >
+            No se detectaron palabras clave.
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

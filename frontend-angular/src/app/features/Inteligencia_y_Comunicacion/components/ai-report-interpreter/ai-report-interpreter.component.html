@@ -1,0 +1,216 @@
+<section class="rounded-2xl border border-emerald-900/60 bg-[#08111f] p-5 text-white shadow-lg">
+  <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+    <div>
+      <h2 class="text-lg font-bold text-emerald-300">
+        Chat IA para reportes dinámicos
+      </h2>
+
+      <p class="text-sm text-slate-400">
+        Escribe el reporte que necesitas. La IA interpretará la solicitud y generará el resultado automáticamente.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="rounded-xl border border-slate-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+      [disabled]="isLoading || isExecuting || isDownloading"
+      (click)="clearChat()"
+    >
+      Limpiar chat
+    </button>
+  </div>
+
+  <div class="mb-4 flex flex-wrap gap-2">
+    <button
+      type="button"
+      class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200 hover:bg-emerald-400/20"
+      (click)="useExample('Genera un reporte en Excel de documentos rechazados')"
+    >
+      Excel rechazados
+    </button>
+
+    <button
+      type="button"
+      class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200 hover:bg-emerald-400/20"
+      (click)="useExample('Muéstrame los documentos pendientes')"
+    >
+      Pendientes
+    </button>
+
+    <button
+      type="button"
+      class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200 hover:bg-emerald-400/20"
+      (click)="useExample('Dame un resumen general de gestión documental')"
+    >
+      Resumen general
+    </button>
+
+    <button
+      type="button"
+      class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200 hover:bg-emerald-400/20"
+      (click)="useExample('Muéstrame descargas y visualizaciones')"
+    >
+      Descargas y vistas
+    </button>
+  </div>
+
+  <div class="mb-4 max-h-72 space-y-3 overflow-y-auto rounded-xl border border-emerald-950 bg-[#06101d] p-3">
+    <div
+      *ngFor="let message of messages"
+      class="flex"
+      [ngClass]="{
+        'justify-end': message.role === 'user',
+        'justify-start': message.role !== 'user'
+      }"
+    >
+      <div
+        class="max-w-[90%] rounded-2xl px-4 py-2 text-sm"
+        [ngClass]="{
+          'bg-emerald-400 text-slate-950': message.role === 'user',
+          'bg-[#0b1628] text-slate-200 border border-emerald-900/70': message.role === 'assistant',
+          'bg-cyan-400/10 text-cyan-300 border border-cyan-400/30': message.role === 'system'
+        }"
+      >
+        {{ message.text }}
+      </div>
+    </div>
+  </div>
+
+  <form class="space-y-3" (ngSubmit)="interpret()">
+    <textarea
+      name="reportPrompt"
+      class="min-h-24 w-full rounded-xl border border-emerald-950 bg-[#06101d] p-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+      placeholder="Ejemplo: Genera un reporte en Excel de documentos rechazados..."
+      [(ngModel)]="prompt"
+      [disabled]="isLoading || isExecuting || isDownloading"
+    ></textarea>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        type="submit"
+        class="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+        [disabled]="isLoading || isExecuting || isDownloading || !prompt.trim()"
+      >
+        @if (isLoading) {
+          Interpretando solicitud...
+        } @else if (isExecuting) {
+          Generando reporte...
+        } @else if (isDownloading) {
+          Descargando Excel...
+        } @else {
+          Generar reporte
+        }
+      </button>
+    </div>
+  </form>
+
+  <div
+    *ngIf="errorMessage"
+    class="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-300"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="mt-4 rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-3 text-sm text-emerald-300"
+  >
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="isExecuting || isDownloading"
+    class="mt-4 rounded-xl border border-slate-700 bg-[#0b1628] p-3 text-sm text-slate-300"
+  >
+    @if (isDownloading) {
+      Generando y descargando reporte Excel...
+    } @else {
+      Consultando reporte en el backend...
+    }
+  </div>
+</section>
+
+<section
+  *ngIf="summaryResult || generalReportResult || detailedReportResult"
+  class="mt-6 space-y-4"
+>
+  <div class="rounded-2xl border border-emerald-300 bg-emerald-50 p-4">
+    <h3 class="text-lg font-bold text-emerald-900">
+      Resultado generado por IA
+    </h3>
+
+    <p class="text-sm text-emerald-700">
+      Este resultado fue generado a partir del endpoint sugerido por Jarvis.
+    </p>
+  </div>
+
+  <app-document-report-summary
+    *ngIf="summaryResult"
+    [summary]="summaryResult"
+  ></app-document-report-summary>
+
+  <div
+    *ngIf="generalReportResult"
+    class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+  >
+    <h3 class="text-lg font-semibold text-slate-800">
+      {{ generalReportResult.title }}
+    </h3>
+
+    <p class="mt-1 text-sm text-slate-500">
+      {{ generalReportResult.description }}
+    </p>
+
+    <div class="mt-4">
+      <h4 class="text-sm font-semibold text-slate-700">
+        Conclusiones
+      </h4>
+
+      <ul
+        *ngIf="generalReportResult.conclusions.length"
+        class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600"
+      >
+        <li *ngFor="let conclusion of generalReportResult.conclusions">
+          {{ conclusion }}
+        </li>
+      </ul>
+
+      <p
+        *ngIf="!generalReportResult.conclusions.length"
+        class="mt-2 text-sm text-slate-500"
+      >
+        No hay conclusiones disponibles.
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="detailedReportResult">
+    <div class="mb-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h3 class="text-lg font-semibold text-slate-800">
+        {{ detailedReportResult.title }}
+      </h3>
+
+      <p class="text-sm text-slate-500">
+        {{ detailedReportResult.description }}
+      </p>
+
+      <p class="mt-2 text-sm font-medium text-slate-700">
+        Total documentos: {{ detailedReportResult.totalDocuments }}
+      </p>
+    </div>
+
+    <div
+      *ngIf="detailedReportResult.totalDocuments === 0"
+      class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm"
+    >
+      No se encontraron documentos con la solicitud realizada.
+    </div>
+
+    <app-document-report-table
+      *ngIf="detailedReportResult.totalDocuments > 0"
+      [documents]="detailedReportResult.documents"
+      [currentUserId]="currentUserId"
+      [currentUserName]="currentUserName"
+    ></app-document-report-table>
+  </div>
+</section>

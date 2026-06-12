@@ -1,9 +1,33 @@
-/frontend-angular/node_modules
-/frontend-angular/.vscode
-/backend-sprint/.vscode
-/backend-sprint/.env_docker
-/backend-fastApi/.env
-/backend-fastApi/.env_docker
-workflow-app.pem
-/backend-sprint/src/main/resources/workflow-app-firebase-key.json
-/frontend-angular/dist
+# Variables de entorno
+.env
+.env.prod
+.env_docker
+*.env
+
+# Python / FastAPI
+backend-fastApi/venv/
+backend-fastApi/.venv/
+backend-fastApi/__pycache__/
+backend-fastApi/**/*.pyc
+
+# Angular
+frontend-angular/node_modules/
+frontend-angular/dist/
+frontend-angular/.angular/
+
+# Node collab server
+collab-doc-server/node_modules/
+
+# Spring Boot
+backend-sprint/target/
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar otros proyectos al mismo nivel
+workflow_app/

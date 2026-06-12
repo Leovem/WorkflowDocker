@@ -1,9 +1,18 @@
 package backend_sprint.backend_sprint.modules.Proccess.controller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import backend_sprint.backend_sprint.modules.Proccess.service.PolicyService;
 import lombok.RequiredArgsConstructor;
@@ -18,71 +27,32 @@ public class PolicyController {
 
     @GetMapping
     public ResponseEntity<?> getAllPolicies() {
-        try {
-            return ResponseEntity.ok(policyService.findAll());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return ResponseEntity.ok(policyService.findAll());
     }
-
 
     @GetMapping("/active")
     public ResponseEntity<?> getActivePolicies() {
-        try {
-            // Llamamos a un nuevo método del servicio que filtra por status = true
-            return ResponseEntity.ok(policyService.findActivePolicies());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return ResponseEntity.ok(policyService.findActivePolicies());
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPolicyById(@PathVariable String id) {
-        try {
-            return ResponseEntity.ok(policyService.findById(id));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return ResponseEntity.ok(policyService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<?> createPolicy(@RequestBody java.util.Map<String, Object> request) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(policyService.create(request));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-           e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    public ResponseEntity<?> createPolicy(@RequestBody Map<String, Object> request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(policyService.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePolicy(@PathVariable String id, @RequestBody java.util.Map<String, Object> request) {
-        try {
-            return ResponseEntity.ok(policyService.update(id, request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-           e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    public ResponseEntity<?> updatePolicy(@PathVariable String id, @RequestBody Map<String, Object> request) {
+        return ResponseEntity.ok(policyService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePolicy(@PathVariable String id) {
-        try {
-            policyService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        policyService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

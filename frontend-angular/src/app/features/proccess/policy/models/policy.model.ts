@@ -1,14 +1,14 @@
 export enum WorkflowNodeType {
-  INICIO = 'INICIO',
-  FIN = 'FIN',
-  IF = 'IF',
-  LOOP = 'LOOP',
-  FOR = 'FOR',
-  JOIN = 'JOIN',
-  FORK = 'FORK',
-  MERGE = 'MERGE',
-  ACTIVIDAD = 'ACTIVIDAD',
-  LANE = 'LANE'
+  INICIO = 'start',
+  FIN = 'end',
+  IF = 'decision',
+  LOOP = 'loop',
+  FOR = 'for',
+  JOIN = 'join',
+  FORK = 'fork',
+  MERGE = 'merge',
+  ACTIVIDAD = 'action',
+  LANE = 'lane'
 }
 
 export interface WorkflowSwimlane {
@@ -18,26 +18,44 @@ export interface WorkflowSwimlane {
   order: number;
 }
 
+export interface WorkflowDocumentConfiguration {
+  requiredDocuments: string[];
+  requiresDocumentUpload: boolean;
+  requiresDocumentReview: boolean;
+}
+
 export interface WorkflowNode {
   id: string;
-  type: WorkflowNodeType;
+  type: WorkflowNodeType | string;
   swimlaneId: string;
   name: string;
   description?: string;
 
-  // Aquí encapsulamos todo lo que el Motor y la IA necesitan saber
   configuration?: {
-    assignedRoleId?: string; // ¿Qué rol específico dentro del departamento hace esto?
-    requiredFields?: string[]; // Ej: ['monto_solicitado', 'ci_cliente'] para que la IA sepa qué extraer
-    isVoiceEnabled?: boolean; // ¿Se puede completar este paso hablando?
-    [key: string]: any; // Flexibilidad para otros datos
+    assignedRoleId?: string;
+    requiredFields?: string[];
+    isVoiceEnabled?: boolean;
+
+    multimedia?: any;
+    mediaLabels?: any;
+    formFields?: any[];
+
+    documents?: WorkflowDocumentConfiguration;
+
+    logic?: {
+      variable?: string | null;
+      operator?: string | null;
+      value?: string | null;
+      mergeStrategy?: string | null;
+    };
+
+    [key: string]: any;
   };
 
   positionX?: number;
   positionY?: number;
   dimensionWidth?: number;
   dimensionHeight?: number;
-
 }
 
 export interface WorkflowEdge {
@@ -45,12 +63,11 @@ export interface WorkflowEdge {
   sourceNodeId: string;
   targetNodeId: string;
   label?: string;
-
-  // Condición lógica que el backend evaluará (Ej: "monto > 5000")
   conditionExpression?: string;
 }
 
 export interface PolicyWorkflow {
+  globalRequirements?: any;
   swimlanes: WorkflowSwimlane[];
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
@@ -61,14 +78,14 @@ export interface Policy {
   name: string;
   description?: string;
   status: boolean;
-  version: number; // Vital para no romper trámites antiguos al editar la política
+  version: number;
 
-  workflow?: any;
+  workflow?: PolicyWorkflow;
   jointEngineState?: any;
+
   createdAt?: string;
   updatedAt?: string;
 }
-
 
 export interface CursorPosition {
   x: number;

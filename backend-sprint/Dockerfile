@@ -1,12 +1,28 @@
-# Usamos Eclipse Temurin en lugar de openjdk oficial
-FROM eclipse-temurin:17-jdk-focal
+# ===============================
+# ETAPA 1: COMPILAR SPRING BOOT
+# ===============================
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# Copiamos el código
-COPY . .
+COPY pom.xml .
 
-# Damos permisos al ejecutable de maven
-RUN chmod +x mvnw
+RUN mvn dependency:go-offline -B
+
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+
+# ===============================
+# ETAPA 2: EJECUTAR SPRING BOOT
+# ===============================
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

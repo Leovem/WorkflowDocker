@@ -8,11 +8,11 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       [disabled]="disabled"
       [type]="type"
       (click)="onClick.emit($event)"
-      class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors 
-             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 
-             focus-visible:ring-offset-2 disabled:opacity-50 bg-emerald-600 text-white 
-             hover:bg-emerald-500 h-10 px-4 py-2 w-full shadow-lg shadow-emerald-900/20 
-             active:scale-[0.98] mt-2 ">
+      class="inline-flex items-center justify-center rounded-xl text-sm font-bold tracking-wide transition-all duration-200
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 
+             focus-visible:ring-offset-2 disabled:opacity-40 bg-cyan-500 text-slate-950 
+             hover:bg-cyan-400 h-11 px-4 py-2 w-full shadow-[0_4px_20px_rgba(6,182,212,0.2)] 
+             hover:shadow-[0_4px_25px_rgba(6,182,212,0.35)] active:scale-[0.98] mt-2 disabled:pointer-events-none">
       <ng-content></ng-content>
     </button>
   `
