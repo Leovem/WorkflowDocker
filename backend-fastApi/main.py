@@ -13,7 +13,7 @@ app = FastAPI(
     description="Sistema Inteligente de Gestión de Políticas y Workflows para la UAGRM",
     version="1.0.0",
     contact={
-        "name": "Puma Dev",
+        "name": "Ved Dev",
         "url": "http://localhost:5173",
     },
     # Esto organiza la UI de Swagger
